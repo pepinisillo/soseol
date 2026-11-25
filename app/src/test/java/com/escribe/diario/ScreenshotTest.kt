@@ -71,6 +71,11 @@ Había practicado mil formas de decirlo, pero ahora, bajo ese temblor dorado de 
         Box(Modifier.fillMaxSize()) { HomeScreen(store, prompt, false, true, 0, {}, {}, {}, {}); BottomBar(Tab.HOME, Modifier.align(Alignment.BottomCenter)) {} }
     } }
 
+    @Config(qualifiers = "w411dp-h1500dp-xxhdpi")
+    @Test fun a1_home_completo() { seed(true); shot("1g_inicio_completo") {
+        HomeScreen(store, prompt, false, false, 0, {}, {}, {}, {})
+    } }
+
     @Test fun a2_home_frase() { seed(true); val f = frase; shot("1b_inicio_frase") {
         Box(Modifier.fillMaxSize()) { HomeScreen(store, f, false, false, 0, {}, {}, {}, {}); BottomBar(Tab.HOME, Modifier.align(Alignment.BottomCenter)) {} }
     } }

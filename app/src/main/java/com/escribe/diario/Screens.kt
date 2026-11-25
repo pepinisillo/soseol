@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -95,7 +96,6 @@ fun HomeScreen(store: Store, prompt: Prompt?, busy: Boolean, blocked: Boolean, t
     val streak = remember(tick) { store.streak() }
     val days = remember(tick) { store.daysWritten() }
     val total = remember(tick) { store.totalWords() }
-    val count = remember(tick) { store.entries().size }
     var askCustom by remember { mutableStateOf(false) }
     val today = LocalDate.now()
 
@@ -152,7 +152,11 @@ fun HomeScreen(store: Store, prompt: Prompt?, busy: Boolean, blocked: Boolean, t
                     Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Color.White.copy(alpha = 0.55f)).padding(14.dp),
                         verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         Text(prompt.theme, fontSize = 16.sp)
-                        if (prompt.twist.isNotBlank()) Text("✦ ${prompt.twist}", fontSize = 14.sp, color = C.Ink.copy(alpha = 0.7f))
+                        if (prompt.twist.isNotBlank()) Row {
+                            Icon(painterResource(R.drawable.ic_sparkle), null, tint = C.LilaDeep, modifier = Modifier.padding(top = 2.dp).size(15.dp))
+                            Spacer(Modifier.width(6.dp))
+                            Text(prompt.twist, fontSize = 14.sp, color = C.Ink.copy(alpha = 0.7f))
+                        }
                     }
                 }
                 busy -> { H("La musa está pensando…", 26, italic = true) }
@@ -205,17 +209,23 @@ fun HomeScreen(store: Store, prompt: Prompt?, busy: Boolean, blocked: Boolean, t
         }
 
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Column(Modifier.weight(1f).height(130.dp).clip(RoundedCornerShape(26.dp)).background(C.LilaSoft).padding(18.dp)) {
-                Text("🔥", fontSize = 24.sp)
-                Spacer(Modifier.weight(1f))
-                H("$streak", 34)
+            Column(Modifier.weight(1f).height(112.dp).clip(RoundedCornerShape(26.dp)).background(C.LilaSoft).padding(18.dp),
+                verticalArrangement = Arrangement.Center) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(painterResource(R.drawable.ic_fire), null, tint = C.LilaDeep, modifier = Modifier.size(30.dp))
+                    Spacer(Modifier.width(8.dp))
+                    H("$streak", 34)
+                }
                 Text("días seguidos", color = C.Ink.copy(alpha = 0.7f), fontSize = 13.sp, fontWeight = FontWeight.Bold)
             }
-            Column(Modifier.weight(1f).height(130.dp).clip(RoundedCornerShape(26.dp)).background(C.Card).padding(18.dp)) {
-                Text("✍️", fontSize = 24.sp)
-                Spacer(Modifier.weight(1f))
-                H("%,d".format(total), 34)
-                Text("palabras en $count historias", color = C.Muted, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+            Column(Modifier.weight(1f).height(112.dp).clip(RoundedCornerShape(26.dp)).background(C.Card).padding(18.dp),
+                verticalArrangement = Arrangement.Center) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(painterResource(R.drawable.ic_pen), null, tint = C.LilaDeep, modifier = Modifier.size(30.dp))
+                    Spacer(Modifier.width(8.dp))
+                    H("%,d".format(total), 34)
+                }
+                Text("palabras escritas", color = C.Muted, fontSize = 13.sp, fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -296,11 +306,17 @@ fun WriteScreen(store: Store, prompt: Prompt, custom: String?, onSaved: () -> Un
             HorizontalDivider(Modifier.padding(horizontal = 16.dp), color = C.Line)
             // Barra compacta estilo Twitter: estado · anillo · Guardar
             Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(when {
-                    words < min -> "Faltan ${min - words}"
-                    words >= max -> "Llegaste al límite"
-                    else -> "Mínimo ✓"
-                }, Modifier.weight(1f), color = if (words >= min) C.LilaDeep else C.Muted, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
+                    Text(when {
+                        words < min -> "Faltan ${min - words}"
+                        words >= max -> "Llegaste al límite"
+                        else -> "Mínimo"
+                    }, color = if (words >= min) C.LilaDeep else C.Muted, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                    if (words in min until max) {
+                        Spacer(Modifier.width(4.dp))
+                        Icon(painterResource(R.drawable.ic_check), null, tint = C.LilaDeep, modifier = Modifier.size(16.dp))
+                    }
+                }
                 Ring(words, min, max)
                 Spacer(Modifier.width(6.dp))
                 Text("$words/$max", color = C.Muted, fontSize = 12.sp, fontWeight = FontWeight.Medium)
@@ -346,10 +362,15 @@ fun Celebrate(words: Int, streak: Int, onDone: () -> Unit) {
     Dialog(onDismissRequest = onDone) {
         Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(32.dp)).background(C.Ink).padding(26.dp),
             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text("🏆", fontSize = 64.sp)
+            Icon(painterResource(R.drawable.ic_trophy), null, tint = C.Lila, modifier = Modifier.size(72.dp))
             H("¡Sigue así!", 30, Color.White)
             Text(msg, color = Color.White.copy(alpha = 0.8f), textAlign = TextAlign.Center, fontSize = 15.sp)
-            Tag("🔥  $streak ${if (streak == 1) "DÍA" else "DÍAS"} DE RACHA", C.Lila, C.Ink)
+            Row(Modifier.clip(RoundedCornerShape(50)).background(C.Lila).padding(horizontal = 12.dp, vertical = 5.dp),
+                verticalAlignment = Alignment.CenterVertically) {
+                Icon(painterResource(R.drawable.ic_fire), null, tint = C.Ink, modifier = Modifier.size(15.dp))
+                Spacer(Modifier.width(5.dp))
+                Text("$streak ${if (streak == 1) "DÍA" else "DÍAS"} DE RACHA", color = C.Ink, fontWeight = FontWeight.SemiBold, fontSize = 11.sp, letterSpacing = 0.8.sp)
+            }
             Spacer(Modifier.height(4.dp))
             Pill("Genial", onDone, Modifier.fillMaxWidth(), bg = Color.White, fg = C.Ink, height = 50.dp)
         }
