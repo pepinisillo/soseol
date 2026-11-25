@@ -101,7 +101,8 @@ object PromptText {
     /** Recorta al primer {...} y quita restos sueltos como `,""}` que a veces agrega el modelo. */
     fun cleanJson(text: String): String {
         var j = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1)
-        j = j.replace(Regex(""",\s*""\s*}"""), "}").replace(Regex(""",\s*}"""), "}")
+        // La llave va escapada (\}): el regex de Android (ICU) no acepta una } suelta y truena.
+        j = j.replace(Regex(""",\s*""\s*\}"""), "}").replace(Regex(""",\s*\}"""), "}")
         return j
     }
 
