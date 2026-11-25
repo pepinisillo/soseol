@@ -121,7 +121,7 @@ fun App(blocked: Boolean, dismissBlocked: () -> Unit) {
 
     Box(Modifier.fillMaxSize().background(C.Bg)) {
         when {
-            writing -> Box(Modifier.systemBarsPadding().imePadding()) {
+            writing -> Box {   // los márgenes de las barras los pone WriteScreen: la portada llena toda la pantalla
                 // Al guardar, vuelve a donde estaba: a la historia si se editó desde ahí, o al inicio.
                 WriteScreen(store, prompt ?: Prompt("", "", "", ""), custom,
                     onSaved = { tick++; dismissBlocked(); writing = false; editing = null; if (reading == null) tab = Tab.HOME },

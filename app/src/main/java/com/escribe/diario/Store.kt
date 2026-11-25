@@ -53,6 +53,8 @@ class Store(ctx: Context) {
     /** Usar Claude en lugar del modelo del teléfono (solo si además hay API key). */
     var useClaude: Boolean get() = p.getBoolean("use_claude", false); set(v) = p.edit().putBoolean("use_claude", v).apply()
     fun claudeOn() = useClaude && apiKey.isNotBlank()
+    /** Recuadro de escribir oscuro con letra blanca (encendido por defecto). */
+    var darkWriter: Boolean get() = p.getBoolean("dark_writer", true); set(v) = p.edit().putBoolean("dark_writer", v).apply()
 
     /** Palabras y frases ya usadas, para no repetirlas. */
     val usedTitles: Set<String> get() = p.getStringSet("used", emptySet()) ?: emptySet()

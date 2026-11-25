@@ -34,6 +34,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
@@ -283,54 +284,61 @@ fun WriteScreen(store: Store, prompt: Prompt, custom: String?, onSaved: () -> Un
     val language = editing?.language ?: if (custom == null) prompt.language else ""
     val theme = editing?.theme ?: if (custom == null) prompt.theme else ""
 
-    Column(Modifier.fillMaxSize().padding(horizontal = 20.dp).padding(top = 8.dp, bottom = 12.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+    val pickCover = { pick.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }
+    // Con portada, arriba queda oscuro: los íconos de la hora y la batería se ponen blancos; al salir vuelven a negros.
+    val view = LocalView.current
+    DisposableEffect(cover != null) {
+        val window = (view.context as? android.app.Activity)?.window
+        val bars = window?.let { androidx.core.view.WindowCompat.getInsetsController(it, view) }
+        bars?.isAppearanceLightStatusBars = cover == null
+        onDispose { bars?.isAppearanceLightStatusBars = true }
+    }
+    // La portada va de fondo de toda la pantalla, aclarada para que se lea encima (como un fondo de terminal).
+    Box(Modifier.fillMaxSize()) {
+    if (cover != null) {
+        Cover(title, cover, Modifier.fillMaxSize(), 0)
+        Box(Modifier.fillMaxSize().background(C.Bg.copy(alpha = 0.35f)))
+        // Arriba se oscurece poco a poco, como un póster, para que el título blanco se lea sin recuadro.
+        Box(Modifier.fillMaxWidth().height(320.dp).background(Brush.verticalGradient(
+            0f to Color.Black.copy(alpha = 0.8f), 0.55f to Color.Black.copy(alpha = 0.45f), 1f to Color.Transparent)))
+    }
+    Column(Modifier.fillMaxSize().systemBarsPadding().imePadding().padding(horizontal = 20.dp).padding(top = 8.dp, bottom = 12.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             RoundIcon(Icons.Rounded.ArrowBack, if (editing != null) leave else onBack)
             Spacer(Modifier.weight(1f))
-            Chip(if (isCustom) "Tema propio" else language.ifBlank { if (editing != null) "reto del día" else prompt.kind }, dark = true)
+            if (cover == null) Pill("Portada", pickCover, bg = C.Soft, fg = C.Ink, height = 36.dp, hPad = 14.dp, textSize = 13, icon = Icons.Rounded.Add)
+            else {
+                RoundIcon(Icons.Rounded.Edit, pickCover, bg = Color.White, fg = C.Ink, size = 36.dp)
+                RoundIcon(Icons.Rounded.Close, { dropCover(); cover = null; if (editing == null) store.draftCover = null },
+                    bg = Color.White, fg = C.Ink, size = 36.dp)
+            }
         }
         Spacer(Modifier.height(14.dp))
-        H(title, 30, italic = true)
-        if (theme.isNotBlank()) Text(theme, color = C.Muted, fontSize = 15.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
-        Spacer(Modifier.height(12.dp))
-
-        // Portada
-        if (cover == null) {
-            Row(Modifier.fillMaxWidth().height(64.dp).clip(RoundedCornerShape(22.dp)).background(C.Soft)
-                .clickable { pick.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }
-                .padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(36.dp).clip(CircleShape).background(C.Card), contentAlignment = Alignment.Center) {
-                    Icon(Icons.Rounded.Add, null, tint = C.Ink)
-                }
-                Spacer(Modifier.width(12.dp))
-                Column {
-                    Text("Agregar portada", fontWeight = FontWeight.Bold)
-                    Text("Opcional · una imagen para tu historia", color = C.Muted, fontSize = 12.sp)
-                }
-            }
-        } else {
-            Box(Modifier.fillMaxWidth().height(130.dp).clip(RoundedCornerShape(24.dp))) {
-                Cover(title, cover, Modifier.fillMaxSize(), 0)
-                Row(Modifier.align(Alignment.TopEnd).padding(10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    RoundIcon(Icons.Rounded.Edit, { pick.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
-                        bg = Color.White, fg = C.Ink, size = 36.dp)
-                    RoundIcon(Icons.Rounded.Close, { dropCover(); cover = null; if (editing == null) store.draftCover = null },
-                        bg = Color.White, fg = C.Ink, size = 36.dp)
-                }
-            }
+        Column {
+            H(title, 30, if (cover != null) Color.White else C.Ink, italic = true)
+            if (theme.isNotBlank()) Text(theme, color = if (cover != null) Color.White.copy(alpha = 0.7f) else C.Muted,
+                fontSize = 15.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
         }
         Spacer(Modifier.height(12.dp))
 
-        Column(Modifier.fillMaxWidth().weight(1f).clip(RoundedCornerShape(26.dp)).background(C.Card)) {
+        // Oscuro con letra blanca si está activado en Ajustes; con portada, además, transparente para que se vea la imagen.
+        val dark = store.darkWriter
+        val ink = if (dark) Color.White else C.Ink
+        val muted = if (dark) Color.White.copy(alpha = 0.6f) else C.Muted
+        val accent = if (dark) C.Lila else C.LilaDeep
+        val line = if (dark) Color.White.copy(alpha = 0.15f) else C.Line
+        Column(Modifier.fillMaxWidth().weight(1f).clip(RoundedCornerShape(26.dp))
+            .background(when { dark && cover != null -> C.Ink.copy(alpha = 0.72f); dark -> C.Ink
+                cover != null -> C.Card.copy(alpha = 0.8f); else -> C.Card })) {
             BasicTextField(text, { n -> text = if (wordCount(n) > max) truncateWords(n, max) else n },
                 Modifier.fillMaxWidth().weight(1f).padding(start = 20.dp, end = 20.dp, top = 18.dp),
-                textStyle = TextStyle(fontFamily = Reading, fontSize = 18.sp, lineHeight = 29.sp, color = C.Ink),
-                cursorBrush = SolidColor(C.LilaDeep),
+                textStyle = TextStyle(fontFamily = Reading, fontSize = 18.sp, lineHeight = 29.sp, color = ink),
+                cursorBrush = SolidColor(accent),
                 decorationBox = { inner ->
-                    if (text.isEmpty()) Text("Empieza con una sola frase…", fontFamily = Reading, fontStyle = FontStyle.Italic, fontSize = 18.sp, color = C.Muted)
+                    if (text.isEmpty()) Text("Empieza con una sola frase…", fontFamily = Reading, fontStyle = FontStyle.Italic, fontSize = 18.sp, color = muted)
                     inner()
                 })
-            HorizontalDivider(Modifier.padding(horizontal = 16.dp), color = C.Line)
+            HorizontalDivider(Modifier.padding(horizontal = 16.dp), color = line)
             // Barra compacta estilo Twitter: estado · anillo · Guardar
             Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
                 Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
@@ -338,16 +346,16 @@ fun WriteScreen(store: Store, prompt: Prompt, custom: String?, onSaved: () -> Un
                         words < min -> "Faltan ${min - words}"
                         words >= max -> "Llegaste al límite"
                         else -> "Mínimo"
-                    }, color = if (words >= min) C.LilaDeep else C.Muted, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                    }, color = if (words >= min) accent else muted, fontSize = 13.sp, fontWeight = FontWeight.Medium)
                     if (words in min until max) {
                         Spacer(Modifier.width(4.dp))
-                        Icon(painterResource(R.drawable.ic_check), null, tint = C.LilaDeep, modifier = Modifier.size(16.dp))
+                        Icon(painterResource(R.drawable.ic_check), null, tint = accent, modifier = Modifier.size(16.dp))
                     }
                 }
-                Ring(words, min, max)
+                Ring(words, min, max, dark)
                 Spacer(Modifier.width(6.dp))
-                Text("$words/$max", color = C.Muted, fontSize = 12.sp, fontWeight = FontWeight.Medium)
-                Box(Modifier.padding(horizontal = 12.dp).width(1.dp).height(24.dp).background(C.Line))
+                Text("$words/$max", color = muted, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                Box(Modifier.padding(horizontal = 12.dp).width(1.dp).height(24.dp).background(line))
                 // Se puede guardar desde una palabra para no perder el reto; si no llega al mínimo, queda «sin terminar».
                 Pill("Guardar", {
                     val wasComplete = editing?.complete ?: false
@@ -366,9 +374,11 @@ fun WriteScreen(store: Store, prompt: Prompt, custom: String?, onSaved: () -> Un
                             onSaved()
                         }
                     }
-                }, enabled = words >= 1, height = 36.dp, hPad = 18.dp, textSize = 14)
+                }, enabled = words >= 1, height = 36.dp, hPad = 18.dp, textSize = 14,
+                    bg = if (dark) C.Lila else C.Ink, fg = if (dark) C.Ink else Color.White)
             }
         }
+    }
     }
 
     if (celebrate) Celebrate(words, store.streak()) { celebrate = false; onSaved() }
@@ -376,21 +386,21 @@ fun WriteScreen(store: Store, prompt: Prompt, custom: String?, onSaved: () -> Un
 
 /** Anillo pequeño como el de Twitter: crece y muestra lo que queda al acercarse al límite. */
 @Composable
-fun Ring(words: Int, min: Int, max: Int) {
+fun Ring(words: Int, min: Int, max: Int, dark: Boolean = false) {
     val left = max - words
     val near = left <= 20
     val progress = (words.toFloat() / max).coerceIn(0f, 1f)
-    val color = when { left <= 0 -> Color(0xFFD9534F); near -> Color(0xFFE5A03A); words >= min -> C.LilaDeep; else -> C.Ink }
+    val color = when { left <= 0 -> Color(0xFFD9534F); near -> Color(0xFFE5A03A); words >= min -> if (dark) C.Lila else C.LilaDeep; else -> if (dark) Color.White else C.Ink }
     Box(Modifier.size(if (near) 30.dp else 22.dp), contentAlignment = Alignment.Center) {
         Canvas(Modifier.fillMaxSize()) {
             val stroke = Stroke(width = 2.5.dp.toPx(), cap = StrokeCap.Round)
-            drawArc(C.Line, 0f, 360f, false, style = stroke)
+            drawArc(if (dark) Color.White.copy(alpha = 0.2f) else C.Line, 0f, 360f, false, style = stroke)
             if (progress > 0f) drawArc(color, -90f, 360f * progress, false, style = stroke)
             // puntito del mínimo
             if (words < min) {
                 val a = Math.toRadians((-90.0 + 360.0 * min / max))
                 val r = size.minDimension / 2
-                drawCircle(C.LilaDeep, 2.dp.toPx(), center.copy(x = center.x + r * Math.cos(a).toFloat(), y = center.y + r * Math.sin(a).toFloat()))
+                drawCircle(if (dark) C.Lila else C.LilaDeep, 2.dp.toPx(), center.copy(x = center.x + r * Math.cos(a).toFloat(), y = center.y + r * Math.sin(a).toFloat()))
             }
         }
         if (near) Text("$left", color = color, fontSize = 10.sp, fontWeight = FontWeight.Medium)
@@ -559,6 +569,7 @@ fun SettingsScreen(store: Store, tick: Int = 0, onDownload: (ModelSpec) -> Unit 
     var blocked by remember { mutableStateOf(store.blockedApps) }
     var pickApps by remember { mutableStateOf(false) }
     var useClaude by remember { mutableStateOf(store.useClaude) }
+    var darkWriter by remember { mutableStateOf(store.darkWriter) }
     var chosen by remember { mutableStateOf(store.modelId) }
     var refresh by remember { mutableIntStateOf(0) }
 
@@ -614,13 +625,19 @@ fun SettingsScreen(store: Store, tick: Int = 0, onDownload: (ModelSpec) -> Unit 
             LineField(likes, { likes = it }, "Tus gustos: fandoms, géneros, personajes", singleLine = false)
             Text("La IA los usa para elegir tus retos. El botón «Lista» no.", color = C.Muted, fontSize = 11.sp)
         }
+        Section("Al escribir") {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("Recuadro oscuro al escribir", Modifier.weight(1f), fontWeight = FontWeight.SemiBold)
+                Switch(darkWriter, { darkWriter = it }, colors = SwitchDefaults.colors(checkedTrackColor = C.Ink, checkedThumbColor = C.Lila))
+            }
+        }
         Pill("Guardar cambios", {
             val mn = min.toIntOrNull()?.coerceAtLeast(1) ?: 200
             store.minWords = mn
             store.maxWords = (max.toIntOrNull() ?: 400).coerceAtLeast(mn)
             store.cutoffHour = (hour.toIntOrNull() ?: 17).coerceIn(0, 23)
             store.blockerOn = blocker; store.apiKey = key; store.model = model; store.interests = likes; store.blockedApps = blocked
-            store.useClaude = useClaude
+            store.useClaude = useClaude; store.darkWriter = darkWriter
             onSaved()
         }, Modifier.fillMaxWidth())
     }
