@@ -79,6 +79,12 @@ fun App(blocked: Boolean, dismissBlocked: () -> Unit) {
         }
     }
 
+    /** Reto al instante de la lista hecha a mano, sin IA. */
+    fun fromList() {
+        if (work != null) return
+        val p = Prompts.fromList(ctx, store); store.savePrompt(p); prompt = p; tick++
+    }
+
     fun download(spec: ModelSpec = store.model()) {
         if (work != null) return
         job = scope.launch {
@@ -116,7 +122,8 @@ fun App(blocked: Boolean, dismissBlocked: () -> Unit) {
                             onWrite = { custom = null; writing = true },
                             onCustom = { custom = it; writing = true },
                             onReroll = { generate() },
-                            onDownload = { download() })
+                            onDownload = { download() },
+                            onList = { fromList() })
                         Tab.HISTORY -> HistoryScreen(store, tick) { reading = it }
                         Tab.SETTINGS -> SettingsScreen(store, tick, onDownload = { download(it) }) { tick++; tab = Tab.HOME }
                     }

@@ -24,17 +24,24 @@ object Prompts {
 
     /** Pide el reto a Claude (si está activado y hay API key) o al modelo del teléfono. */
     suspend fun generate(ctx: Context, store: Store, kind: String, onProgress: (Float, String) -> Unit): Prompt {
-        if (store.claudeOn()) return fromClaude(store, kind, onProgress)
+        if (store.claudeOn()) return fromClaude(store, kind, onProgress).also { store.markUsed(it.title) }
         val m = store.model()
         if (!LocalModel.isReady(ctx, m)) throw NoModelException()
-        val seed = if (kind == "tema") null else Words.pick(kind, store.usedTitles)
+        // Para palabra, la IA elige entre unas reales de la lista según los gustos; no las inventa.
+        val options = if (kind == "palabra") Words.candidates(ctx, kind, store.usedTitles, 12) else emptyList()
         repeat(2) {
-            val text = LocalModel.generate(ctx, m, PromptText.askLocal(kind, seed, store.interests, store.minWords, store.maxWords),
-                if (seed == null) 260 else 200, onProgress)
-            PromptText.parseLocal(text, kind, seed)?.let { store.markUsed(it.title); onProgress(1f, "¡Listo!"); return it }
+            val text = LocalModel.generate(ctx, m, PromptText.askLocal(kind, options, store.interests),
+                if (kind == "palabra") 25 else 90, onProgress)
+            PromptText.parseLocal(text, kind, options)?.let { store.markUsed(it.title); onProgress(1f, "¡Listo!"); return it }
         }
+        // Si no eligió bien una palabra, igual sirve cualquiera de las candidatas.
+        if (options.isNotEmpty()) return options.random().also { store.markUsed(it.title) }
         error("La musa no logró formular el reto. Intenta de nuevo.")
     }
+
+    /** Un reto al instante de la lista hecha a mano, sin IA. */
+    fun fromList(ctx: Context, store: Store, kind: String = randomKind()): Prompt =
+        Words.pick(ctx, kind, store.usedTitles).also { store.markUsed(it.title) }
 
     private suspend fun fromClaude(store: Store, kind: String, onProgress: (Float, String) -> Unit): Prompt = coroutineScope {
         // Claude no informa avance: el anillo avanza por tiempo y se completa al llegar la respuesta.
@@ -47,7 +54,7 @@ object Prompts {
     }
 
     private fun askClaude(store: Store, kind: String): Prompt? = runCatching {
-        val ask = PromptText.ask(kind, store.interests, store.minWords, store.maxWords, LocalDate.now().toString())
+        val ask = PromptText.ask(kind, store.interests, LocalDate.now().toString())
         val body = JSONObject().put("model", store.model).put("max_tokens", 600)
             .put("messages", org.json.JSONArray().put(JSONObject().put("role", "user").put("content", ask)))
         val c = URL("https://api.anthropic.com/v1/messages").openConnection() as HttpURLConnection

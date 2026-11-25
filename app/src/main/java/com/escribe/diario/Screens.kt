@@ -87,7 +87,8 @@ fun Cover(entryTitle: String, path: String?, modifier: Modifier, seed: Long, let
 
 @Composable
 fun HomeScreen(store: Store, prompt: Prompt?, busy: Boolean, blocked: Boolean, tick: Int,
-               onWrite: () -> Unit, onCustom: (String) -> Unit, onReroll: () -> Unit, onDownload: () -> Unit) {
+               onWrite: () -> Unit, onCustom: (String) -> Unit, onReroll: () -> Unit, onDownload: () -> Unit,
+               onList: () -> Unit = {}) {
     val ctx = LocalContext.current
     val aiReady = remember(tick, busy) { Prompts.available(ctx, store) }
     val m = remember(tick) { store.model() }
@@ -140,23 +141,23 @@ fun HomeScreen(store: Store, prompt: Prompt?, busy: Boolean, blocked: Boolean, t
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Tag(if (prompt != null) Prompts.label(prompt.kind) else "RETO DEL DÍA", C.Ink, C.Lila)
                 Spacer(Modifier.weight(1f))
-                if (!done && prompt != null && aiReady) RoundIcon(Icons.Rounded.Refresh, { if (!busy) onReroll() }, size = 38.dp)
+                if (!done && prompt != null) {
+                    // «Lista» saca un reto al instante de la lista hecha a mano; discreto junto al de la IA.
+                    Pill("Lista", { if (!busy) onList() }, bg = Color.White.copy(alpha = 0.45f), fg = C.Ink,
+                        height = 34.dp, hPad = 14.dp, textSize = 13)
+                    if (aiReady) { Spacer(Modifier.width(8.dp)); RoundIcon(Icons.Rounded.Refresh, { if (!busy) onReroll() }, size = 38.dp) }
+                }
             }
             Spacer(Modifier.height(4.dp))
             when {
                 prompt != null -> {
-                    H(prompt.title, when (prompt.kind) { "frase" -> 28; "tema" -> 32; else -> 42 }, italic = true)
+                    H(prompt.title, when (prompt.kind) { "palabra" -> 42; else -> 32 }, italic = true)
                     if (prompt.language.isNotBlank()) Text(prompt.language, fontFamily = Display, fontStyle = FontStyle.Italic, color = C.Ink.copy(alpha = 0.65f), fontSize = 15.sp)
-                    Text(prompt.meaning, fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
-                    Spacer(Modifier.height(6.dp))
-                    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Color.White.copy(alpha = 0.55f)).padding(14.dp),
+                    if (prompt.meaning.isNotBlank()) Text(prompt.meaning, fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
+                    if (prompt.theme.isNotBlank() || prompt.twist.isNotBlank()) Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Color.White.copy(alpha = 0.55f)).padding(14.dp),
                         verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text(prompt.theme, fontSize = 16.sp)
-                        if (prompt.twist.isNotBlank()) Row {
-                            Icon(painterResource(R.drawable.ic_sparkle), null, tint = C.LilaDeep, modifier = Modifier.padding(top = 2.dp).size(15.dp))
-                            Spacer(Modifier.width(6.dp))
-                            Text(prompt.twist, fontSize = 14.sp, color = C.Ink.copy(alpha = 0.7f))
-                        }
+                        if (prompt.theme.isNotBlank()) Text(prompt.theme, fontSize = 17.sp)
+                        if (prompt.twist.isNotBlank()) Text(prompt.twist, fontSize = 14.sp, color = C.Ink.copy(alpha = 0.7f))
                     }
                 }
                 busy -> { H("La musa está pensando…", 26, italic = true) }
@@ -164,7 +165,11 @@ fun HomeScreen(store: Store, prompt: Prompt?, busy: Boolean, blocked: Boolean, t
                     H("Aún no hay reto", 26)
                     Text("Pídele a la musa tu reto de hoy.", fontSize = 15.sp)
                     Spacer(Modifier.height(6.dp))
-                    Pill("Pedir reto", onReroll, height = 46.dp, textSize = 15)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Pill("Pedir reto", onReroll, height = 46.dp, textSize = 15)
+                        Spacer(Modifier.width(10.dp))
+                        Pill("De la lista", onList, bg = Color.White.copy(alpha = 0.45f), fg = C.Ink, height = 46.dp, textSize = 15)
+                    }
                 }
                 else -> {
                     H("Conoce a tu musa", 28)
@@ -174,6 +179,7 @@ fun HomeScreen(store: Store, prompt: Prompt?, busy: Boolean, blocked: Boolean, t
                     Spacer(Modifier.height(6.dp))
                     Pill(if (partial > 0) "Continuar descarga (${LocalModel.gb(partial)} / ${LocalModel.gb(m.size)} GB)"
                         else "Descargar musa (${LocalModel.gb(m.size)} GB)", onDownload, height = 46.dp, textSize = 15)
+                    Pill("O saca uno de la lista", onList, bg = Color.White.copy(alpha = 0.45f), fg = C.Ink, height = 42.dp, textSize = 14)
                 }
             }
         }

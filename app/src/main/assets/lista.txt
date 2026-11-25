@@ -1,0 +1,576 @@
+# Lista de retos de soseol. Se usa con el botón «Lista» y para que la IA elija palabras reales.
+#
+# Una línea por reto, con los campos separados por |
+#   tipo | título | idioma | recuadro | nota
+#
+# palabra: título = la palabra; idioma = idioma · escritura original; recuadro = qué significa.
+# frase:   título = resumen corto en español; recuadro = la frase completa; nota = traducción (si es de otro idioma).
+# tema:    título = el tema; recuadro = una línea corta que lo aclare.
+#
+# Las líneas que empiezan con # se ignoran. Agrega las tuyas donde quieras.
+
+# ---------------------------------------------------------------- PALABRAS · coreano
+palabra|Seollem|coreano · 설렘|el cosquilleo nervioso y feliz de algo o alguien que te ilusiona|
+palabra|Geurium|coreano · 그리움|extrañar a alguien o algo que está lejos|
+palabra|Jeong|coreano · 정|el afecto hondo que nace del tiempo compartido, aunque no lo busques|
+palabra|Nunchi|coreano · 눈치|el arte de leer el ambiente y lo que nadie dice|
+palabra|Han|coreano · 한|un dolor hondo y paciente que se carga por dentro|
+palabra|Yeoun|coreano · 여운|lo que se queda resonando después de que algo termina|
+palabra|Yunseul|coreano · 윤슬|el brillo del sol o de la luna sobre el agua que se mueve|
+palabra|Noeul|coreano · 노을|el resplandor rojizo del cielo al atardecer|
+palabra|Mirinae|coreano · 미리내|la Vía Láctea, en una palabra antigua coreana|
+palabra|Dalbit|coreano · 달빛|la luz de la luna|
+palabra|Byeolbit|coreano · 별빛|la luz de las estrellas|
+palabra|Haetsal|coreano · 햇살|los rayos de sol que te dan en la cara|
+palabra|Saebyeok|coreano · 새벽|la madrugada, la hora azul antes del alba|
+palabra|Sonagi|coreano · 소나기|chubasco de verano que se va tan rápido como llega|
+palabra|Garangbi|coreano · 가랑비|llovizna tan fina que te moja sin que lo notes|
+palabra|Bombi|coreano · 봄비|lluvia de primavera|
+palabra|Cheonnun|coreano · 첫눈|la primera nevada; dicen que hay que verla con quien quieres|
+palabra|Iseul|coreano · 이슬|el rocío de la mañana|
+palabra|Nunsongi|coreano · 눈송이|copo de nieve|
+palabra|Bitmul|coreano · 빗물|agua de lluvia|
+palabra|Bamhaneul|coreano · 밤하늘|el cielo de noche|
+palabra|Byeolttongbyeol|coreano · 별똥별|estrella fugaz|
+palabra|Yeoreumbam|coreano · 여름밤|noche de verano|
+palabra|Gyeouljam|coreano · 겨울잠|el sueño largo del invierno, hibernar|
+palabra|Haebaragi|coreano · 해바라기|girasol; también quien solo tiene ojos para una persona|
+palabra|Aryeonhada|coreano · 아련하다|un recuerdo borroso, dulce y un poco triste|
+palabra|Aeteuthada|coreano · 애틋하다|ternura que duele: querer a alguien con un poco de pena|
+palabra|Meongmeokhada|coreano · 먹먹하다|un nudo en el pecho que no te deja hablar|
+palabra|Mungkeulhada|coreano · 뭉클하다|cuando algo te conmueve y se te aprieta el pecho|
+palabra|Aswipda|coreano · 아쉽다|la pena de que algo bueno se acabe o se quede corto|
+palabra|Seounhada|coreano · 서운하다|sentirte dolido porque alguien cercano no estuvo|
+palabra|Eogulhada|coreano · 억울하다|la rabia de sentirte tratado injustamente|
+palabra|Dapdaphada|coreano · 답답하다|sofoco, la frustración de algo que no avanza|
+palabra|Siwonhada|coreano · 시원하다|un alivio fresco, como cuando por fin dices algo|
+palabra|Pogeunhada|coreano · 포근하다|acogedor, cálido y suave como una cobija|
+palabra|Jeonggyeopda|coreano · 정겹다|entrañable, que da cariño|
+palabra|Hangyeolgatda|coreano · 한결같다|ser siempre igual, constante de principio a fin|
+palabra|Seoreum|coreano · 설움|la pena acumulada de sentirte solo o maltratado|
+palabra|Miryeon|coreano · 미련|el apego que no te deja soltar algo que ya terminó|
+palabra|Inyeon|coreano · 인연|el lazo del destino entre dos personas|
+palabra|Ujeong|coreano · 우정|amistad|
+palabra|Sarang|coreano · 사랑|amor|
+palabra|Dasom|coreano · 다솜|amor, en una palabra antigua coreana|
+palabra|Jjaksarang|coreano · 짝사랑|amor no correspondido|
+palabra|Cheotsarang|coreano · 첫사랑|primer amor|
+palabra|Sseom|coreano · 썸|la etapa en que se gustan pero todavía no son nada|
+palabra|Gobaek|coreano · 고백|confesar lo que sientes|
+palabra|Simkung|coreano · 심쿵|cuando el corazón da un vuelco (coloquial)|
+palabra|Kongkkakji|coreano · 콩깍지|«vaina de frijol»: el filtro del enamorado que lo ve todo perfecto|
+palabra|Nunmatchum|coreano · 눈맞춤|mirarse a los ojos|
+palabra|Jinsim|coreano · 진심|lo que sientes de verdad, de corazón|
+palabra|Aegyo|coreano · 애교|portarse tierno o mimoso a propósito|
+palabra|Hyeong|coreano · 형|«hermano mayor»: así le dice un chico a un amigo mayor|
+palabra|Seonbae|coreano · 선배|compañero con más antigüedad en la escuela o el trabajo|
+palabra|Hubae|coreano · 후배|compañero más nuevo o más joven|
+palabra|Banmal|coreano · 반말|hablarse de tú; dejar las formalidades es un paso de confianza|
+palabra|Jondaenmal|coreano · 존댓말|el habla formal y respetuosa|
+palabra|Sokkupchingu|coreano · 소꿉친구|amigo de la infancia, con quien jugabas a la casita|
+palabra|Kkanbu|coreano · 깐부|compañero inseparable que lo comparte todo contigo|
+palabra|Uri|coreano · 우리|«nosotros»: se dice «nuestra casa» aunque sea solo tuya|
+palabra|Dongne|coreano · 동네|el barrio, tu vecindario|
+palabra|Golmok|coreano · 골목|callejón angosto entre casas|
+palabra|Pojangmacha|coreano · 포장마차|puesto callejero con carpa para comer y beber de noche|
+palabra|Noraebang|coreano · 노래방|cuarto privado de karaoke|
+palabra|Jjimjilbang|coreano · 찜질방|baños y sauna públicos donde hasta se puede pasar la noche|
+palabra|Gohyang|coreano · 고향|el pueblo o la ciudad de donde eres|
+palabra|Sonpyeonji|coreano · 손편지|carta escrita a mano|
+palabra|Honbap|coreano · 혼밥|comer solo|
+palabra|Chimaek|coreano · 치맥|pollo frito con cerveza|
+palabra|Meongttaerida|coreano · 멍때리다|quedarse en blanco mirando a la nada|
+palabra|Bulmeong|coreano · 불멍|mirar el fuego sin pensar en nada|
+palabra|Mulmeong|coreano · 물멍|mirar el agua sin pensar en nada|
+palabra|Kkuljam|coreano · 꿀잠|«sueño de miel»: dormir delicioso y profundo|
+palabra|Jamkkodae|coreano · 잠꼬대|hablar dormido|
+palabra|Ogeulgeorida|coreano · 오글거리다|la vergüenza ajena ante algo demasiado cursi|
+palabra|Gwichanta|coreano · 귀찮다|qué flojera, qué fastidio|
+palabra|Sohwakhaeng|coreano · 소확행|una felicidad pequeña pero segura|
+palabra|Heung|coreano · 흥|la alegría que te hace querer cantar y bailar|
+palabra|Jaemi|coreano · 재미|diversión, la gracia de algo|
+palabra|Neukkim|coreano · 느낌|la sensación, la vibra que te da algo|
+palabra|Hyodo|coreano · 효도|cuidar y honrar a tus padres|
+palabra|Gidarim|coreano · 기다림|la espera|
+palabra|Onsaemiro|coreano · 온새미로|tal como es, sin cambiar nada|
+palabra|Haengun|coreano · 행운|buena suerte|
+palabra|Daebak|coreano · 대박|¡increíble!, un golpe de suerte enorme|
+palabra|Hwaiting|coreano · 화이팅|¡ánimo!, ¡tú puedes!|
+palabra|Ppalli-ppalli|coreano · 빨리빨리|¡rápido, rápido!: la prisa como forma de vida|
+palabra|Mianhae|coreano · 미안해|perdón, entre personas cercanas|
+palabra|Gomawo|coreano · 고마워|gracias, entre personas cercanas|
+palabra|Saranghae|coreano · 사랑해|te quiero|
+palabra|Jipdori|coreano · 집돌이|persona muy hogareña que no quiere salir|
+palabra|Eomchina|coreano · 엄친아|«el hijo del amigo de mamá»: el chico perfecto con el que siempre te comparan|
+
+# ---------------------------------------------------------------- PALABRAS · japonés
+palabra|Komorebi|japonés · 木漏れ日|la luz del sol que se filtra entre las hojas|
+palabra|Mono no aware|japonés · 物の哀れ|ternura melancólica ante lo que pasa y no vuelve|
+palabra|Wabi-sabi|japonés · 侘寂|la belleza de lo imperfecto y pasajero|
+palabra|Natsukashii|japonés · 懐かしい|nostalgia feliz por algo del pasado|
+palabra|Yūgen|japonés · 幽玄|una belleza profunda y misteriosa que no se puede explicar|
+palabra|Koi no yokan|japonés · 恋の予感|presentir, al conocer a alguien, que te vas a enamorar|
+palabra|Kintsugi|japonés · 金継ぎ|reparar con oro lo roto, sin esconder las grietas|
+palabra|Ma|japonés · 間|la pausa, el espacio vacío que le da sentido a todo lo demás|
+palabra|Mujō|japonés · 無常|nada es permanente|
+palabra|Utsuroi|japonés · 移ろい|el cambio lento de las cosas y de las estaciones|
+palabra|Yoin|japonés · 余韻|lo que sigue resonando después de que algo termina|
+palabra|Ukiyo|japonés · 浮世|«el mundo flotante»: vivir el momento|
+palabra|Kogarashi|japonés · 木枯らし|el viento frío que deshoja los árboles cuando llega el invierno|
+palabra|Yūyake|japonés · 夕焼け|el cielo encendido del atardecer|
+palabra|Yoake|japonés · 夜明け|el amanecer|
+palabra|Yozora|japonés · 夜空|el cielo de noche|
+palabra|Hoshizora|japonés · 星空|cielo estrellado|
+palabra|Tsukiakari|japonés · 月明かり|la luz de la luna|
+palabra|Koyoi|japonés · 今宵|esta noche (poético)|
+palabra|Kawaakari|japonés · 川明かり|el brillo de un río en la oscuridad|
+palabra|Hidamari|japonés · 陽だまり|el rincón donde se junta el sol|
+palabra|Tsuyu|japonés · 梅雨|la temporada de lluvias de inicio del verano|
+palabra|Yūdachi|japonés · 夕立|aguacero repentino en una tarde de verano|
+palabra|Kitsune no yomeiri|japonés · 狐の嫁入り|«la boda del zorro»: cuando llueve con sol|
+palabra|Sakura fubuki|japonés · 桜吹雪|tormenta de pétalos de cerezo|
+palabra|Momiji|japonés · 紅葉|las hojas rojas del otoño|
+palabra|Hotaru|japonés · 蛍|luciérnaga|
+palabra|Fūrin|japonés · 風鈴|campanilla de viento que suena en verano|
+palabra|Hanabi|japonés · 花火|fuegos artificiales («flores de fuego»)|
+palabra|Natsu matsuri|japonés · 夏祭り|festival de verano|
+palabra|Tanabata|japonés · 七夕|el festival de los amantes separados por la Vía Láctea|
+palabra|Hanami|japonés · 花見|contemplar los cerezos en flor|
+palabra|Tsukimi|japonés · 月見|contemplar la luna de otoño|
+palabra|Hatsuyume|japonés · 初夢|el primer sueño del año|
+palabra|Hatsuhinode|japonés · 初日の出|el primer amanecer del año|
+palabra|Natsubate|japonés · 夏バテ|el agotamiento por el calor del verano|
+palabra|Fuyugomori|japonés · 冬籠もり|encerrarse en casa todo el invierno|
+palabra|Shinrin-yoku|japonés · 森林浴|«baño de bosque»: caminar entre árboles para sanar|
+palabra|Kotatsu|japonés · 炬燵|mesa baja con cobija y calentador, de donde nadie se quiere salir|
+palabra|Engawa|japonés · 縁側|el corredor de madera que da al jardín|
+palabra|Wasurenagusa|japonés · 勿忘草|nomeolvides, la flor|
+palabra|Hatsukoi|japonés · 初恋|primer amor|
+palabra|Kataomoi|japonés · 片思い|amor no correspondido|
+palabra|Ryōomoi|japonés · 両思い|amor correspondido|
+palabra|Hitomebore|japonés · 一目惚れ|enamorarse a primera vista|
+palabra|Kokuhaku|japonés · 告白|confesar tu amor|
+palabra|Shitsuren|japonés · 失恋|corazón roto, un amor perdido|
+palabra|Ichizu|japonés · 一途|entregado por completo a una sola persona o meta|
+palabra|Nukumori|japonés · 温もり|la calidez que deja alguien|
+palabra|Amae|japonés · 甘え|dejarse consentir, confiando en el cariño del otro|
+palabra|Setsunai|japonés · 切ない|un dolor dulce que aprieta el pecho|
+palabra|Sabishii|japonés · 寂しい|sentirse solo, echar de menos compañía|
+palabra|Akogare|japonés · 憧れ|admiración que se vuelve anhelo|
+palabra|Kizuna|japonés · 絆|lazo profundo entre personas|
+palabra|Nakama|japonés · 仲間|los tuyos: compañeros que son familia|
+palabra|Omoiyari|japonés · 思いやり|pensar en lo que siente el otro antes que en ti|
+palabra|Yasashii|japonés · 優しい|amable, gentil|
+palabra|Kokoro|japonés · 心|corazón, mente y alma a la vez|
+palabra|Honne|japonés · 本音|lo que de verdad sientes|
+palabra|Tatemae|japonés · 建前|la cara que muestras en público|
+palabra|Enryo|japonés · 遠慮|contenerse por consideración, no pedir de más|
+palabra|Aimai|japonés · 曖昧|ambiguo, ni sí ni no|
+palabra|Gaman|japonés · 我慢|aguantar con paciencia y dignidad|
+palabra|Shōganai|japonés · しょうがない|no se puede evitar: aceptar y seguir|
+palabra|Ganbaru|japonés · 頑張る|esforzarse hasta el final|
+palabra|Mottainai|japonés · もったいない|la pena de desperdiciar algo valioso|
+palabra|Ikigai|japonés · 生き甲斐|la razón por la que vale la pena levantarse|
+palabra|Tsundoku|japonés · 積ん読|acumular libros sin llegar a leerlos|
+palabra|Shibui|japonés · 渋い|una belleza sencilla, sutil y discreta|
+palabra|Kuchisabishii|japonés · 口寂しい|comer porque la boca se siente sola|
+palabra|Kuidaore|japonés · 食い倒れ|arruinarse de tanto comer bien|
+palabra|Hara hachi bu|japonés · 腹八分|comer hasta quedar lleno al ochenta por ciento|
+palabra|Age-otori|japonés · 上げ劣り|verse peor después de cortarse el pelo|
+palabra|Kanashibari|japonés · 金縛り|despertar sin poder moverte|
+palabra|Kamikakushi|japonés · 神隠し|desaparecer, «escondido por los dioses»|
+palabra|Senpai|japonés · 先輩|compañero mayor o con más experiencia|
+palabra|Kōhai|japonés · 後輩|compañero más joven o más nuevo|
+palabra|Tsundere|japonés · ツンデレ|frío por fuera, tierno por dentro|
+palabra|Kabedon|japonés · 壁ドン|acorralar a alguien contra la pared apoyando la mano|
+palabra|Dokidoki|japonés · ドキドキ|el latido rápido de los nervios o del amor|
+palabra|Ukiuki|japonés · ウキウキ|emoción alegre, ilusión|
+palabra|Kirakira|japonés · キラキラ|que brilla y destella|
+palabra|Mofumofu|japonés · もふもふ|suave y esponjoso, como un gato|
+palabra|Otsukaresama|japonés · お疲れ様|«gracias por tu esfuerzo»: reconocer el cansancio del otro|
+palabra|Itadakimasu|japonés · いただきます|lo que se dice antes de comer, agradeciendo|
+palabra|Tadaima|japonés · ただいま|«ya llegué», al volver a casa|
+palabra|Okaeri|japonés · おかえり|«bienvenido de vuelta»|
+palabra|Itterasshai|japonés · いってらっしゃい|«ve y vuelve», al despedir a alguien|
+palabra|Sayōnara|japonés · さようなら|adiós, a veces para siempre|
+palabra|Sotsugyō|japonés · 卒業|graduación, el final de una etapa|
+palabra|Dai-ni botan|japonés · 第二ボタン|el segundo botón del uniforme, que se regala a quien amas al graduarte|
+palabra|Bentō|japonés · 弁当|almuerzo en caja hecho en casa|
+palabra|Omamori|japonés · お守り|amuleto de un templo|
+palabra|Ema|japonés · 絵馬|tablilla de madera donde se escriben deseos en un templo|
+
+# ---------------------------------------------------------------- PALABRAS · otros idiomas
+palabra|Saudade|portugués|nostalgia dulce por algo o alguien que ya no está|
+palabra|Querência|portugués|el lugar donde uno se siente a salvo|
+palabra|Sehnsucht|alemán|anhelo profundo por algo que no sabes nombrar|
+palabra|Fernweh|alemán|nostalgia por lugares lejanos que no conoces|
+palabra|Hiraeth|galés|añoranza de un hogar al que no se puede volver|
+palabra|Cwtch|galés|un abrazo cálido que es refugio|
+palabra|Mångata|sueco|el reflejo de la luna en el agua, como un camino|
+palabra|Resfeber|sueco|los nervios y la emoción antes de un viaje|
+palabra|Gökotta|sueco|levantarse al alba para escuchar a los pájaros|
+palabra|Lagom|sueco|ni mucho ni poco: lo justo|
+palabra|Smultronställe|sueco|«lugar de fresas silvestres»: tu rincón secreto y querido|
+palabra|Meraki|griego|poner el alma en lo que haces|
+palabra|Philoxenia|griego|el cariño y la hospitalidad hacia los extraños|
+palabra|Eunoia|griego|pensamiento bello, buena voluntad hacia los demás|
+palabra|Retrouvailles|francés|la alegría de reencontrarse tras mucho tiempo|
+palabra|Dépaysement|francés|sentirse extranjero, fuera de su ambiente|
+palabra|Iktsuarpok|inuktitut|salir una y otra vez a ver si ya llega alguien|
+palabra|Toska|ruso|angustia del alma, un anhelo sin causa clara|
+palabra|Mudita|pali|la alegría por la felicidad de otra persona|
+palabra|Ohana|hawaiano|familia, incluida la que uno elige|
+palabra|Jayus|indonesio|un chiste tan malo que da risa|
+palabra|Kaukokaipuu|finés|anhelo por un lugar lejano|
+palabra|Sielunmaisema|finés|«paisaje del alma»: un lugar que resuena contigo|
+palabra|Uitwaaien|neerlandés|salir al viento para despejar la mente|
+palabra|Abbiocco|italiano|la somnolencia después de una comida abundante|
+palabra|Culaccino|italiano|la marca que deja un vaso frío sobre la mesa|
+palabra|Rimpatriata|italiano|el reencuentro de viejos amigos|
+palabra|Sprezzatura|italiano|la elegancia de hacer parecer fácil lo difícil|
+palabra|Lítost|checo|el tormento de descubrir de golpe la propia miseria|
+palabra|Yuánfèn|chino · 缘分|el destino que une a dos personas|
+palabra|Wu wei|chino · 无为|actuar sin forzar, como el agua|
+palabra|Gluggaveður|islandés|un clima precioso para ver por la ventana, pero helado afuera|
+palabra|Hüzün|turco|una melancolía suave y compartida|
+palabra|Yakamoz|turco|el brillo de la luna sobre el mar|
+palabra|Dor|rumano|anhelo profundo por alguien o algo amado|
+palabra|Tęsknota|polaco|una añoranza intensa|
+palabra|Mokita|kilivila|una verdad que todos conocen y nadie dice|
+
+# ---------------------------------------------------------------- PALABRAS · español
+palabra|Efímero|español|que dura muy poco|
+palabra|Momentáneo|español|que solo dura un momento|
+palabra|Fugaz|español|que pasa muy rápido y no vuelve|
+palabra|Inefable|español|que no se puede explicar con palabras|
+palabra|Sobremesa|español|la plática que sigue después de comer, sin prisa|
+palabra|Querencia|español|el lugar al que siempre quieres volver|
+palabra|Duermevela|español|el sueño ligero, entre dormido y despierto|
+palabra|Ensimismarse|español|perderse en tus propios pensamientos|
+palabra|Arrebol|español|el color rojizo de las nubes al atardecer|
+palabra|Resolana|español|el reflejo del sol que calienta aunque no le des directo|
+palabra|Vislumbrar|español|ver algo apenas, de lejos o a medias|
+palabra|Añoranza|español|extrañar algo que ya no tienes|
+palabra|Desvelo|español|quedarse despierto por algo o por alguien|
+palabra|Lontananza|español|lo que se ve muy a lo lejos|
+palabra|Ojalá|español|desear con fuerza que algo pase|
+palabra|Serendipia|español|un hallazgo feliz que no buscabas|
+palabra|Petricor|español|el olor de la tierra cuando empieza a llover|
+palabra|Nefelibata|español|alguien que anda en las nubes|
+palabra|Alba|español|la primera luz del día|
+palabra|Crepúsculo|español|la luz que queda entre el día y la noche|
+palabra|Ocaso|español|la puesta del sol; también el final de algo|
+palabra|Sempiterno|español|que dura para siempre|
+palabra|Etéreo|español|tan sutil que parece hecho de aire|
+palabra|Recóndito|español|escondido, muy adentro|
+palabra|Entrañable|español|que se quiere de corazón|
+palabra|Lánguido|español|sin fuerzas, cansado y lento|
+palabra|Arrumaco|español|caricia o gesto de cariño|
+palabra|Embeleso|español|quedarse encantado mirando algo|
+palabra|Sosiego|español|calma, paz por dentro|
+palabra|Desasosiego|español|inquietud que no te deja en paz|
+palabra|Aguacero|español|lluvia fuerte y repentina|
+palabra|Bruma|español|niebla ligera, sobre todo cerca del mar|
+palabra|Murmullo|español|el ruido suave de voces o de agua|
+palabra|Apapachar|español|abrazar con mucho cariño|
+palabra|Achicopalarse|español|desanimarse, sentirse chiquito|
+palabra|Chiquear|español|consentir a alguien|
+palabra|Antojo|español|ganas repentinas de algo|
+palabra|Melancolía|español|una tristeza suave y larga|
+palabra|Candor|español|inocencia sincera|
+palabra|Quimera|español|un sueño imposible|
+palabra|Epifanía|español|de pronto entenderlo todo|
+palabra|Ataraxia|español|tranquilidad total del alma|
+palabra|Solsticio|español|el día más largo o más corto del año|
+
+# ---------------------------------------------------------------- FRASES · español
+frase|El último ciclo||Los últimos minutos del último ciclo.|
+frase|La casa||Nadie me dijo que la casa recordaría tu voz.|
+frase|Llegar tarde||Llegaste tarde, pero llegaste.|
+frase|Despedidas||Era la tercera vez que se despedían ese día.|
+frase|El café frío||Esa noche el café se enfrió entre los dos.|
+frase|La carta||Nunca le dije que la carta era para él.|
+frase|La bufanda||Todavía guardo tu bufanda.|
+frase|La lluvia sabía||La lluvia sabía algo que nosotros no.|
+frase|Se quedó||Y entonces, por fin, se quedó.|
+frase|La llave||Todavía tengo la llave de un departamento que ya no existe.|
+frase|Las tres de la mañana||A las tres de la mañana todo suena a confesión.|
+frase|Mensajes sin mandar||Escribí el mensaje cuatro veces y no mandé ninguno.|
+frase|El andén||El tren se fue y yo me quedé en el andén con su nombre en la boca.|
+frase|La mitad||Me dejaste la mitad de la cama y toda la culpa.|
+frase|La foto borrosa||En la foto salimos borrosos, pero se nota que nos reíamos.|
+frase|Silencio||El silencio entre los dos tenía forma de pregunta.|
+frase|El techo||Contamos las grietas del techo hasta quedarnos dormidos.|
+frase|Domingo||Los domingos olían a ropa limpia y a ti.|
+frase|La ventana||Dejé la ventana abierta por si volvías.|
+frase|El reloj||El reloj de la cocina siempre iba cinco minutos tarde, como él.|
+frase|Mañana||Mañana te lo digo, me prometí por milésima vez.|
+frase|Kilómetros||Nos separaban dos mil kilómetros y una mala señal.|
+frase|Nuestra canción||Esa canción ya no es mía, es nuestra.|
+frase|El regreso||Volví al pueblo y nadie se acordaba de mí, excepto él.|
+frase|La sudadera||Me prestó su sudadera y nunca se la devolví.|
+frase|El final||Lo supe antes de que terminara la película.|
+frase|Las luces||Se apagó la ciudad y por fin vimos las estrellas.|
+frase|El invierno||Aquel invierno aprendimos a compartir una sola cobija.|
+frase|La pregunta||¿Y si esta vez no me voy?|
+frase|El atardecer||Nos debíamos un atardecer.|
+frase|La promesa||Prometimos no enamorarnos, y fue la primera mentira.|
+frase|La azotea||En la azotea el mundo parecía más pequeño y nosotros más grandes.|
+frase|Las manos||Sus manos siempre estaban frías y las mías siempre listas.|
+frase|El nombre||Dijo mi nombre como si lo hubiera practicado.|
+frase|La última vez||No sabíamos que era la última vez.|
+frase|El primer día||El primer día de clases me senté en su lugar.|
+frase|El perro||El perro lo quiso antes que yo.|
+frase|La receta||La receta de su abuela llevaba un ingrediente que nadie sabía.|
+frase|El apagón||Durante el apagón dijimos cosas que la luz no habría dejado.|
+frase|Colgar||Ninguno de los dos quería ser el primero en colgar.|
+frase|El espejo||El espejo del baño todavía tenía su dibujo en el vapor.|
+frase|El último autobús||Perdimos el último autobús a propósito.|
+frase|La tormenta||La tormenta nos encerró en el lugar menos indicado.|
+frase|La caja de galletas||Guardaba todas sus cartas en una caja de galletas.|
+frase|El sueño||Soñé contigo y desperté oliendo a tu shampoo.|
+frase|La maleta||Me dijo adiós con la mano que no cargaba la maleta.|
+frase|El cumpleaños||Olvidé su cumpleaños y él no olvidó el mío.|
+frase|Los gatos||Los gatos del vecindario sabían más de nosotros que nadie.|
+frase|El castillo de arena||El mar se llevó la arena, pero no el castillo.|
+frase|Las cajas||Entre las cajas de la mudanza encontré algo que no era mío.|
+frase|La sala de espera||En la sala de espera aprendí a rezar.|
+frase|La escalera||Nos encontrábamos siempre en la escalera, nunca en el elevador.|
+frase|El tren nocturno||En el tren nocturno solo había otro pasajero despierto, además de mí.|
+frase|Subrayados||Alguien subrayaba los mismos libros que yo.|
+frase|Ahorita vengo||Lo último que me dijo fue «ahorita vengo».|
+frase|Las once once||Pedí el mismo deseo cada 11:11 durante un año.|
+frase|El concierto||Al final del concierto me di cuenta de que no había visto el escenario.|
+frase|La boda||En la boda de mi hermana conocí al único invitado que no quería estar ahí.|
+frase|Estrellas muertas||Algunas estrellas ya están muertas y siguen brillando para nosotros.|
+frase|Esperar la nieve||Me dijo que lo esperara hasta la primera nevada.|
+frase|La ventanilla||Desde la ventanilla del avión, su ciudad era una mancha de luz.|
+frase|El paraguas||Teníamos un solo paraguas y ninguna prisa.|
+frase|La lista||Hice una lista de razones para olvidarte y la perdí.|
+frase|El eco||Grité su nombre en el túnel y el eco no me lo devolvió.|
+frase|Las cicatrices||Me enseñó sus cicatrices como quien enseña un mapa.|
+frase|El balcón||Desde el balcón de enfrente alguien me saludaba cada noche.|
+frase|Dos tazas||Seguí sirviendo dos tazas mucho tiempo después.|
+frase|El sabor||Hay comidas que ya no sé comer sin ti.|
+frase|Volver||Todo lo que se va bien, vuelve distinto.|
+frase|La primera nieve||La primera nieve del año cayó justo cuando dijo que se iba.|
+
+# ---------------------------------------------------------------- FRASES · coreano
+frase|La primera nevada|coreano|첫눈이 오면 만나자 (cheonnuni omyeon mannaja)|«Veámonos cuando caiga la primera nevada»
+frase|¿Ya comiste?|coreano|밥 먹었어? (bap meogeosseo?)|«¿Ya comiste?»: una forma de decir que alguien te importa
+frase|Te esforzaste|coreano|수고했어 (sugohaesseo)|«Te esforzaste»: reconocer todo lo que el otro cargó hoy
+frase|Quiero verte|coreano|보고 싶어 (bogo sipeo)|«Quiero verte»: así se dice «te extraño»
+frase|Está bien|coreano|괜찮아 (gwaenchana)|«Está bien»: para consolar, o para fingir que lo estás
+frase|Duerme bien|coreano|잘 자 (jal ja)|«Duerme bien»
+frase|Te llevo a casa|coreano|집에 데려다줄게 (jibe deryeodajulge)|«Te acompaño a casa»
+frase|Polvo y montaña|coreano|티끌 모아 태산 (tikkeul moa taesan)|«Juntando polvo se hace una montaña»
+frase|Palabras que vuelven|coreano|가는 말이 고와야 오는 말이 곱다|«Si las palabras que van son amables, las que vuelven también»
+frase|Después del sufrimiento|coreano|고생 끝에 낙이 온다 (gosaeng kkeute nagi onda)|«Al final del sufrimiento llega la alegría»
+frase|Empezar|coreano|시작이 반이다 (sijagi banida)|«Empezar es la mitad»
+frase|Las paredes oyen|coreano|낮말은 새가 듣고 밤말은 쥐가 듣는다|«Lo que dices de día lo oyen los pájaros; lo de noche, los ratones»
+frase|Lejos de los ojos|coreano|눈에서 멀어지면 마음에서도 멀어진다|«Lejos de los ojos, lejos del corazón»
+frase|La rana en el pozo|coreano|우물 안 개구리 (umul an gaeguri)|«La rana dentro del pozo»: quien cree que su mundo es todo el mundo
+frase|Pastel pintado|coreano|그림의 떡 (geurimui tteok)|«Pastel de arroz en un cuadro»: algo que deseas y no puedes tener
+frase|Antes de tiempo|coreano|김칫국부터 마시지 마|«No te tomes el caldo de kimchi antes»: no cantes victoria antes de tiempo
+
+# ---------------------------------------------------------------- FRASES · japonés
+frase|La luna|japonés|月が綺麗ですね (tsuki ga kirei desu ne)|«La luna está hermosa, ¿verdad?»: una forma discreta de decir «te quiero»
+frase|Volver a casa|japonés|ただいま。おかえり。(tadaima. okaeri.)|«Ya llegué.» «Bienvenido de vuelta.»
+frase|Una vez, un encuentro|japonés|一期一会 (ichi-go ichi-e)|«Una vez, un encuentro»: cada momento es irrepetible
+frase|Dangos antes que flores|japonés|花より団子 (hana yori dango)|«Dangos antes que flores»: lo práctico antes que lo bonito
+frase|Siete caídas|japonés|七転び八起き (nanakorobi yaoki)|«Caer siete veces, levantarse ocho»
+frase|Las patas del gato|japonés|猫の手も借りたい (neko no te mo karitai)|«Quisiera que me prestaran hasta las patas del gato»: estar ocupadísimo
+frase|Los monos también caen|japonés|猿も木から落ちる (saru mo ki kara ochiru)|«Hasta los monos se caen de los árboles»: todos se equivocan
+frase|Después de la lluvia|japonés|雨降って地固まる (ame futte ji katamaru)|«Tras la lluvia, la tierra se endurece»: lo difícil une
+frase|Diez colores|japonés|十人十色 (jūnin toiro)|«Diez personas, diez colores»: cada quien es distinto
+frase|Dar la vuelta|japonés|急がば回れ (isogaba maware)|«Si tienes prisa, da la vuelta»
+frase|Tres años en una piedra|japonés|石の上にも三年 (ishi no ue ni mo sannen)|«Hasta en una piedra, en tres años»: la paciencia todo lo calienta
+frase|El clavo que sobresale|japonés|出る杭は打たれる (deru kui wa utareru)|«Al clavo que sobresale le dan el martillazo»
+frase|El hilo rojo|japonés|運命の赤い糸 (unmei no akai ito)|«El hilo rojo del destino»: une a quienes están destinados
+frase|Agua derramada|japonés|覆水盆に返らず (fukusui bon ni kaerazu)|«El agua derramada no vuelve a la bandeja»: lo hecho, hecho está
+frase|Oro para un gato|japonés|猫に小判 (neko ni koban)|«Monedas de oro a un gato»: dar algo valioso a quien no lo aprecia
+
+# ---------------------------------------------------------------- FRASES · otros idiomas
+frase|Llueven cuerdas|francés|Il pleut des cordes|«Llueven cuerdas»: llueve a cántaros
+frase|Me faltas|italiano|Mi manchi|«Me faltas»: así se dice «te extraño»
+frase|Tú me faltas|francés|Tu me manques|«Tú me faltas»: te extraño
+frase|El golpe de rayo|francés|Le coup de foudre|«El golpe de rayo»: amor a primera vista
+frase|Una piedra menos|alemán|Mir fällt ein Stein vom Herzen|«Se me cae una piedra del corazón»: qué alivio
+frase|La cucaracha|francés|Avoir le cafard|«Tener la cucaracha»: estar decaído
+frase|La noche|latín|Carpe noctem|«Aprovecha la noche»
+frase|La respuesta tardía|francés|L'esprit de l'escalier|la respuesta perfecta que se te ocurre cuando ya es tarde
+frase|No hacer nada|italiano|Dolce far niente|«La dulzura de no hacer nada»
+frase|Todo saldrá bien|islandés|Þetta reddast|«Esto se arreglará»: todo saldrá bien
+frase|Un no sé qué|francés|Je ne sais quoi|un encanto imposible de explicar
+frase|Tomates en los ojos|alemán|Tomaten auf den Augen haben|«Tener tomates en los ojos»: no ver lo evidente
+frase|Solo entiendo estación|alemán|Ich verstehe nur Bahnhof|«Solo entiendo estación»: no entiendo nada
+frase|Sin rumbo|italiano|Andare a zonzo|«Pasear sin rumbo»
+frase|La boca del lobo|italiano|In bocca al lupo|«En la boca del lobo»: buena suerte
+frase|Ver navíos|portugués|Ficar a ver navios|«Quedarse viendo navíos»: esperar en vano
+frase|Matar la nostalgia|portugués|Matar saudades|«Matar la nostalgia»: volver a ver a quien extrañabas
+frase|Hacia las estrellas|latín|Ad astra per aspera|«A las estrellas por caminos difíciles»
+frase|Amar el destino|latín|Amor fati|«Amar el propio destino»
+frase|Recordar vivir|latín|Memento vivere|«Recuerda vivir»
+frase|Despacio|suajili|Pole pole|«Despacio, despacio»: sin prisa
+frase|Quien va despacio|italiano|Chi va piano va sano e va lontano|«Quien va despacio va seguro y llega lejos»
+frase|El sol y las estrellas|italiano|L'amor che move il sole e l'altre stelle|«El amor que mueve el sol y las demás estrellas» (Dante)
+
+# ---------------------------------------------------------------- TEMAS · cosas de todos los días
+tema|El piso estaba sucio||alguien tiene que limpiarlo, y nadie quiere|
+tema|Cuando se caen los libros||un estante cede en el peor momento|
+tema|El vaso de la cafetera ya no sirve||algo de todos los días se rompe|
+tema|Se fue la luz||todo a oscuras un buen rato|
+tema|El elevador atorado||encerrados entre dos pisos|
+tema|Las llaves perdidas||quedarse afuera de casa|
+tema|Se quemó la comida||cocinar no salió como debía|
+tema|La planta que no se muere||algo que sigue vivo contra todo|
+tema|El celular sin batería||incomunicado justo ahora|
+tema|La mancha en la camisa||un detalle antes de algo importante|
+tema|La lavandería||esperar a que termine la secadora|
+tema|La fila del súper||plática con un desconocido|
+tema|La regadera fría||se acabó el agua caliente|
+tema|El foco fundido||cambiarlo entre dos|
+tema|Tender la ropa||el viento y las sábanas|
+tema|Esperar el camión||parada, lluvia y conversación|
+tema|El refrigerador vacío||qué vamos a cenar|
+tema|El calcetín perdido||lo que siempre falta|
+tema|Romper un plato||un accidente en la cocina|
+tema|La cama sin hacer||la mañana después|
+tema|La pintura fresca||alguien se recarga en la pared recién pintada|
+tema|La lavadora inundó todo||agua por todo el piso|
+tema|Dinero en una chamarra vieja||una sorpresa olvidada|
+tema|Un ruido de madrugada||algo suena en la casa|
+tema|La tarea olvidada||el pánico de la mañana|
+tema|El mensaje en visto||nadie contesta|
+tema|Un globo que se escapa||ver algo irse|
+tema|Pintar la casa||brochas, manchas y música|
+tema|El perro del vecino||entra a tu casa sin permiso|
+tema|Aprender a manejar||uno enseña, el otro sufre|
+tema|El tostador||siempre quema el pan|
+tema|La ropa del otro||usar algo que no es tuyo|
+tema|Una foto vieja||el pasado en un cajón|
+tema|El olor de la casa||volver a un lugar por su olor|
+tema|La canción en la radio||una canción que trae recuerdos|
+tema|Una tarde de domingo||no pasa nada, y eso es todo|
+tema|La sobremesa||una plática que nadie quiere terminar|
+tema|El cumpleaños olvidado||alguien no se acordó|
+tema|Noche de películas||un sofá y una sola cobija|
+tema|Cocinar juntos||la cocina como campo de batalla|
+tema|El primer día de trabajo||todo es nuevo y da miedo|
+tema|El vecino de al lado||paredes demasiado delgadas|
+tema|Un gato callejero||algo pequeño cambia la rutina|
+tema|Una mascota perdida||buscarla juntos|
+tema|Un mensaje de voz||escucharlo una y otra vez|
+tema|El regalo equivocado||algo que no era para ti|
+tema|Las manos frías||buscar calor|
+tema|Perder el paraguas||mojarse a propósito|
+tema|La mudanza||empacar una vida en cajas|
+tema|El último tren||perderlo o alcanzarlo|
+tema|Insomnio||no poder dormir|
+tema|El turno de noche||trabajar mientras todos duermen|
+tema|La tienda de 24 horas||clientes raros de madrugada|
+tema|Temporada de exámenes||estudiar juntos hasta tarde|
+
+# ---------------------------------------------------------------- TEMAS · tropos
+tema|Viaje en el tiempo||ir o volver a otra época|
+tema|Una sola cama||dos personas, un error de reservación|
+tema|Enemigos a amantes||se odian hasta que no|
+tema|Fingir una relación||una mentira que se sale de control|
+tema|Amigos de la infancia||se conocen de toda la vida|
+tema|Segunda oportunidad||volver a intentarlo años después|
+tema|Almas gemelas||marcas, hilos o señales del destino|
+tema|El hilo rojo||atados por el destino|
+tema|Bucle temporal||el mismo día se repite|
+tema|Amnesia||uno olvida, el otro no|
+tema|Reencarnación||se reconocen de otra vida|
+tema|Hanahaki||flores que crecen por un amor no correspondido|
+tema|Compañeros de cuarto||compartir departamento, y algo más|
+tema|Identidad secreta||uno esconde quién es en realidad|
+tema|Guardaespaldas||protegerlo es su trabajo|
+tema|Admirador secreto||cartas sin firma|
+tema|Mensaje equivocado||un texto llega a la persona incorrecta|
+tema|Rivales||una competencia que se vuelve otra cosa|
+tema|Celos||verlo con alguien más|
+tema|Cuidar al enfermo||uno se enferma, el otro se queda|
+tema|Confesión||decirlo por fin en voz alta|
+tema|Reencuentro||verse de nuevo tras años|
+tema|Despedida en el aeropuerto||alguien se va lejos|
+tema|Un solo paraguas||compartirlo bajo la lluvia|
+tema|Primer beso||nervios y torpeza|
+tema|Una carta que nunca se envió||lo que no se dijo|
+tema|Una apuesta||perder a propósito|
+tema|Una promesa de niños||prometieron casarse a los siete años|
+tema|El diario||leer lo que no debías|
+tema|Dormirse en su hombro||en el tren o en el sofá|
+tema|Ser el segundo||querer a quien quiere a otro|
+tema|Heridas que se curan||uno cura al otro|
+tema|Tatuaje compartido||marcarse juntos|
+tema|Mundo sin colores||ves colores solo al conocerlo|
+tema|La primera cita||planes que salen mal|
+tema|Aniversario||recordar cómo empezó todo|
+tema|La sorpresa||planear algo a escondidas|
+tema|La pelea||decir lo que no se debía|
+tema|Hacer las paces||después del pleito|
+tema|El secreto||lo que nadie más sabe|
+tema|El primer «te quiero»||quién lo dice primero|
+tema|El abrazo||uno que dura de más|
+tema|Llamada a medianoche||alguien necesita hablar|
+tema|La cicatriz||la historia detrás de una marca|
+tema|La lista de deseos||cosas que hacer antes de que sea tarde|
+tema|La herencia||algo que te dejó alguien|
+tema|El desconocido del tren||compartir el viaje|
+tema|Un idioma que no hablas||entenderse sin palabras|
+
+# ---------------------------------------------------------------- TEMAS · universos alternos
+tema|Universo de mafia||lealtades peligrosas|
+tema|Universo de fantasía||magia, reinos o criaturas|
+tema|Universo de oficina||juntas y miradas en el elevador|
+tema|Universo de cafetería||el barista y el cliente de siempre|
+tema|Universo escolar||uniformes, clubes y exámenes|
+tema|Universo de idols||escenarios, fans y secretos|
+tema|Universo de vampiros||sed, eternidad y luz del sol|
+tema|Universo espacial||una nave lejos de casa|
+tema|Apocalipsis||sobrevivir juntos al fin del mundo|
+tema|Héroe y villano||lados opuestos|
+tema|Príncipes||el deber contra el deseo|
+tema|Sirena||alguien que viene del mar|
+tema|Ángel y demonio||cielo contra infierno|
+tema|Brujo y aprendiz||magia que se enseña|
+tema|Detective||un caso que se vuelve personal|
+tema|Universo deportivo||el equipo y el capitán|
+tema|La banda||ensayos y escenarios pequeños|
+tema|Fantasmas||alguien que no se ha ido del todo|
+tema|El cartero||entregar las cartas de otros|
+tema|El faro||alguien que cuida la luz|
+
+# ---------------------------------------------------------------- TEMAS · lugares
+tema|Un museo cerrado||de noche entre las obras|
+tema|Un parque de diversiones abandonado||juegos que ya no se mueven|
+tema|La estación espacial||silencio y la Tierra por la ventana|
+tema|Una cabaña en la montaña||nieve y chimenea|
+tema|El invernadero||plantas y calor|
+tema|Una tienda de discos||buscar la canción exacta|
+tema|El set de rodaje||ficción y realidad|
+tema|Una isla||aislados del mundo|
+tema|Un barco||mar abierto|
+tema|El hospital de madrugada||esperar noticias|
+tema|La azotea||la ciudad desde arriba|
+tema|Una biblioteca antigua||polvo, silencio y notas en los márgenes|
+tema|El festival de verano||linternas, comida y fuegos artificiales|
+tema|La playa en invierno||nadie más que ustedes|
+tema|Un viaje en carretera||horas de camino y música|
+tema|Perderse en una ciudad||sin mapa ni señal|
+tema|Volver al pueblo||todo cambió menos uno|
+tema|La tormenta||encerrados por el clima|
+
+# ---------------------------------------------------------------- TEMAS · emociones
+tema|Nostalgia||extrañar lo que fue|
+tema|Miedo||algo que no deja dormir|
+tema|Orgullo||no querer pedir perdón|
+tema|Alivio||por fin todo salió bien|
+tema|Ternura||un gesto pequeño|
+tema|Arrepentimiento||lo que harías distinto|
+tema|Envidia||querer lo que tiene el otro|
+tema|Soledad||estar rodeado y sentirse solo|
+tema|Esperanza||algo que todavía puede pasar|
+tema|Vergüenza||lo que no quieres que nadie vea|
