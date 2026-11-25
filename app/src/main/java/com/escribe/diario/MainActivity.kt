@@ -65,6 +65,7 @@ fun App(blocked: Boolean, dismissBlocked: () -> Unit) {
     var writing by remember { mutableStateOf(false) }
     var custom by remember { mutableStateOf<String?>(null) }
     var reading by remember { mutableStateOf<Long?>(null) }
+    var editing by remember { mutableStateOf<Long?>(null) }   // historia guardada que se está continuando o corrigiendo
     var tick by remember { mutableIntStateOf(0) }
     var prompt by remember { mutableStateOf(store.savedPrompt()) }
     var work by remember { mutableStateOf<Work?>(null) }
@@ -115,16 +116,19 @@ fun App(blocked: Boolean, dismissBlocked: () -> Unit) {
 
     LaunchedEffect(Unit) { if (prompt == null && Prompts.available(ctx, store)) generate() }
     BackHandler(writing || reading != null || tab != Tab.HOME) {
-        when { writing -> writing = false; reading != null -> reading = null; else -> tab = Tab.HOME }
+        when { writing -> { writing = false; editing = null }; reading != null -> reading = null; else -> tab = Tab.HOME }
     }
 
     Box(Modifier.fillMaxSize().background(C.Bg)) {
         when {
             writing -> Box(Modifier.systemBarsPadding().imePadding()) {
-                WriteScreen(store, prompt ?: Prompt("", "", "", ""), custom, onSaved = { tick++; dismissBlocked(); writing = false; tab = Tab.HOME },
-                    onBack = { writing = false })
+                // Al guardar, vuelve a donde estaba: a la historia si se editó desde ahí, o al inicio.
+                WriteScreen(store, prompt ?: Prompt("", "", "", ""), custom,
+                    onSaved = { tick++; dismissBlocked(); writing = false; editing = null; if (reading == null) tab = Tab.HOME },
+                    onBack = { writing = false; editing = null }, editing = editing?.let { store.entry(it) })
             }
-            reading != null -> ReadScreen(store, reading!!, onBack = { reading = null }, onChanged = { tick++ })
+            reading != null -> ReadScreen(store, reading!!, onBack = { reading = null }, onChanged = { tick++ },
+                onEdit = { editing = it; writing = true }, tick = tick)
             else -> {
                 Box(Modifier.statusBarsPadding()) {
                     when (tab) {
@@ -133,7 +137,8 @@ fun App(blocked: Boolean, dismissBlocked: () -> Unit) {
                             onCustom = { custom = it; writing = true },
                             onReroll = { generate() },
                             onDownload = { download() },
-                            onList = { fromList() })
+                            onList = { fromList() },
+                            onContinue = { editing = it; custom = null; writing = true })
                         Tab.HISTORY -> HistoryScreen(store, tick) { reading = it }
                         Tab.SETTINGS -> SettingsScreen(store, tick, onDownload = { download(it) }) { tick++; tab = Tab.HOME }
                     }

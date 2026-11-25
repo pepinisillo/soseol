@@ -2,6 +2,7 @@ package com.escribe.diario
 
 import android.content.Intent
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import android.content.pm.PackageManager
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -93,7 +94,7 @@ fun navBottom() = WindowInsets.navigationBars.asPaddingValues().calculateBottomP
 @Composable
 fun HomeScreen(store: Store, prompt: Prompt?, busy: Boolean, blocked: Boolean, tick: Int,
                onWrite: () -> Unit, onCustom: (String) -> Unit, onReroll: () -> Unit, onDownload: () -> Unit,
-               onList: () -> Unit = {}) {
+               onList: () -> Unit = {}, onContinue: (Long) -> Unit = {}) {
     val ctx = LocalContext.current
     val aiReady = remember(tick, busy) { Prompts.available(ctx, store) }
     val m = remember(tick) { store.model() }
@@ -189,7 +190,11 @@ fun HomeScreen(store: Store, prompt: Prompt?, busy: Boolean, blocked: Boolean, t
             }
         }
 
-        if (prompt != null) Pill(if (done) "Escribir otro con este reto" else "Escribir ahora", onWrite, Modifier.fillMaxWidth(),
+        // Si este reto ya tiene una historia guardada sin terminar, se sigue esa en vez de empezar otra.
+        val pending = remember(tick, prompt) { prompt?.let { p -> store.entries().firstOrNull { !it.complete && !it.custom && it.title == p.title } } }
+        if (pending != null) Pill("Continuar escribiendo", { onContinue(pending.id) }, Modifier.fillMaxWidth(),
+            enabled = !busy, icon = Icons.Rounded.Create)
+        else if (prompt != null) Pill(if (done) "Escribir otro con este reto" else "Escribir ahora", onWrite, Modifier.fillMaxWidth(),
             enabled = !busy, icon = Icons.Rounded.Create)
         GhostPill("Escribir sobre un tema propio", { askCustom = true }, Modifier.fillMaxWidth(), icon = Icons.Rounded.Add)
 
@@ -253,29 +258,40 @@ fun HomeScreen(store: Store, prompt: Prompt?, busy: Boolean, blocked: Boolean, t
 
 // ---------------------------------------------------------------- ESCRIBIR
 
+/**
+ * Pantalla de escribir. Con [editing] abre una historia ya guardada (para continuarla o corregirla)
+ * en vez de una nueva; en ese caso no toca el borrador.
+ */
 @Composable
-fun WriteScreen(store: Store, prompt: Prompt, custom: String?, onSaved: () -> Unit, onBack: () -> Unit) {
+fun WriteScreen(store: Store, prompt: Prompt, custom: String?, onSaved: () -> Unit, onBack: () -> Unit, editing: Entry? = null) {
     val ctx = LocalContext.current
     val min = store.minWords; val max = store.maxWords
-    var text by remember { mutableStateOf(store.draft) }
-    var cover by remember { mutableStateOf(store.draftCover) }
+    var text by remember { mutableStateOf(editing?.body ?: store.draft) }
+    var cover by remember { mutableStateOf(if (editing != null) editing.cover else store.draftCover) }
     var celebrate by remember { mutableStateOf(false) }
     val words = wordCount(text)
-    LaunchedEffect(text) { store.draft = text }
+    LaunchedEffect(text) { if (editing == null) store.draft = text }
+    // Al editar, la portada original no se borra hasta guardar: si sales sin guardar, la historia queda como estaba.
+    fun dropCover() { if (editing == null || cover != editing.cover) Covers.delete(cover) }
     val pick = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        if (uri != null) Covers.import(ctx, uri)?.let { Covers.delete(cover); cover = it; store.draftCover = it }
+        if (uri != null) Covers.import(ctx, uri)?.let { dropCover(); cover = it; if (editing == null) store.draftCover = it }
     }
-    val title = custom ?: prompt.title
+    val leave = { dropCover(); onBack() }
+    if (editing != null) BackHandler { leave() }
+    val isCustom = editing?.custom ?: (custom != null)
+    val title = editing?.title ?: custom ?: prompt.title
+    val language = editing?.language ?: if (custom == null) prompt.language else ""
+    val theme = editing?.theme ?: if (custom == null) prompt.theme else ""
 
     Column(Modifier.fillMaxSize().padding(horizontal = 20.dp).padding(top = 8.dp, bottom = 12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            RoundIcon(Icons.Rounded.ArrowBack, onBack)
+            RoundIcon(Icons.Rounded.ArrowBack, if (editing != null) leave else onBack)
             Spacer(Modifier.weight(1f))
-            Chip(if (custom != null) "Tema propio" else prompt.language.ifBlank { prompt.kind }, dark = true)
+            Chip(if (isCustom) "Tema propio" else language.ifBlank { if (editing != null) "reto del día" else prompt.kind }, dark = true)
         }
         Spacer(Modifier.height(14.dp))
-        H(title, if (custom == null && prompt.kind == "frase") 24 else 30, italic = true)
-        if (custom == null) Text(prompt.theme, color = C.Muted, fontSize = 15.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        H(title, 30, italic = true)
+        if (theme.isNotBlank()) Text(theme, color = C.Muted, fontSize = 15.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
         Spacer(Modifier.height(12.dp))
 
         // Portada
@@ -298,7 +314,7 @@ fun WriteScreen(store: Store, prompt: Prompt, custom: String?, onSaved: () -> Un
                 Row(Modifier.align(Alignment.TopEnd).padding(10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     RoundIcon(Icons.Rounded.Edit, { pick.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
                         bg = Color.White, fg = C.Ink, size = 36.dp)
-                    RoundIcon(Icons.Rounded.Close, { Covers.delete(cover); cover = null; store.draftCover = null },
+                    RoundIcon(Icons.Rounded.Close, { dropCover(); cover = null; if (editing == null) store.draftCover = null },
                         bg = Color.White, fg = C.Ink, size = 36.dp)
                 }
             }
@@ -334,12 +350,21 @@ fun WriteScreen(store: Store, prompt: Prompt, custom: String?, onSaved: () -> Un
                 Box(Modifier.padding(horizontal = 12.dp).width(1.dp).height(24.dp).background(C.Line))
                 // Se puede guardar desde una palabra para no perder el reto; si no llega al mínimo, queda «sin terminar».
                 Pill("Guardar", {
-                    store.addEntry(title, if (custom == null) prompt.language else "", if (custom == null) prompt.theme else "",
-                        text.trim(), cover, custom != null)
-                    if (words >= min) celebrate = true
-                    else {
-                        Toast.makeText(ctx, "Guardada sin terminar: no cuenta para hoy hasta llegar a $min palabras.", Toast.LENGTH_LONG).show()
-                        onSaved()
+                    val wasComplete = editing?.complete ?: false
+                    val complete = if (editing != null) {
+                        if (cover != editing.cover) Covers.delete(editing.cover)
+                        store.updateEntry(editing.id, text.trim(), cover)?.complete ?: false
+                    } else {
+                        store.addEntry(title, language, theme, text.trim(), cover, isCustom)
+                        words >= min
+                    }
+                    when {
+                        complete && !wasComplete -> celebrate = true
+                        else -> {
+                            Toast.makeText(ctx, if (complete) "Cambios guardados." else
+                                "Guardada sin terminar: no cuenta para hoy hasta llegar a $min palabras.", Toast.LENGTH_LONG).show()
+                            onSaved()
+                        }
                     }
                 }, enabled = words >= 1, height = 36.dp, hPad = 18.dp, textSize = 14)
             }
@@ -430,9 +455,9 @@ fun HistoryScreen(store: Store, tick: Int, onOpen: (Long) -> Unit) {
 // ---------------------------------------------------------------- LEER (ref. Kidory)
 
 @Composable
-fun ReadScreen(store: Store, id: Long, onBack: () -> Unit, onChanged: () -> Unit) {
+fun ReadScreen(store: Store, id: Long, onBack: () -> Unit, onChanged: () -> Unit, onEdit: (Long) -> Unit = {}, tick: Int = 0) {
     val ctx = LocalContext.current
-    var e by remember(id) { mutableStateOf(store.entry(id)) }
+    var e by remember(id, tick) { mutableStateOf(store.entry(id)) }
     var confirmDelete by remember { mutableStateOf(false) }
     val pick = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         val cur = e
@@ -460,6 +485,8 @@ fun ReadScreen(store: Store, id: Long, onBack: () -> Unit, onChanged: () -> Unit
                 Text("  ·  ${entry.words} palabras${if (entry.complete) "" else " (sin terminar)"}  ·  ${prettyDate(entry.date)}", color = C.Muted, fontSize = 13.sp)
             }
             if (entry.theme.isNotBlank()) Text(entry.theme, color = C.Muted, fontStyle = FontStyle.Italic, fontSize = 15.sp)
+            Pill(if (entry.complete) "Editar" else "Continuar escribiendo", { onEdit(entry.id) }, bg = C.Soft, fg = C.Ink,
+                height = 40.dp, hPad = 18.dp, textSize = 14, icon = Icons.Rounded.Create)
             HorizontalDivider(color = C.Line)
             val body = entry.body
             Text(buildAnnotatedString {

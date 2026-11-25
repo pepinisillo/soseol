@@ -106,6 +106,20 @@ class Store(ctx: Context) {
         p.edit().putString("draft", "").remove("draft_cover").apply()
     }
 
+    /**
+     * Guarda los cambios a una historia ya guardada. Si con esto llega al mínimo por primera vez,
+     * pasa a contar como escrita hoy (no el día en que se empezó, para no rellenar la racha hacia atrás).
+     */
+    fun updateEntry(id: Long, body: String, cover: String?): Entry? {
+        val old = entry(id) ?: return null
+        val words = wordCount(body)
+        val complete = old.complete || words >= minWords
+        val e = old.copy(body = body, words = words, cover = cover, complete = complete,
+            date = if (complete && !old.complete) LocalDate.now().toString() else old.date)
+        write(entries().map { if (it.id == id) e else it })
+        return e
+    }
+
     fun setCover(id: Long, cover: String?) = write(entries().map { if (it.id == id) it.copy(cover = cover) else it })
     fun delete(id: Long) = write(entries().filter { it.id != id })
 
