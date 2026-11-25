@@ -1,0 +1,3 @@
+<resources>
+    <string name="service_desc">Detecta qué app abres para bloquear las que elegiste hasta que escribas tu texto del día. No lee tu pantalla ni tus datos.</string>
+</resources>

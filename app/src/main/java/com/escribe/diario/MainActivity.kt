@@ -1,0 +1,152 @@
+package com.escribe.diario
+
+import android.content.Intent
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.List
+import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+
+enum class Tab { HOME, HISTORY, SETTINGS }
+
+class MainActivity : ComponentActivity() {
+    private var blockedMsg by mutableStateOf(false)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge(statusBarStyle = SystemBarStyle.light(C.Bg.toArgb(), C.Bg.toArgb()),
+            navigationBarStyle = SystemBarStyle.light(C.Bg.toArgb(), C.Bg.toArgb()))
+        super.onCreate(savedInstanceState)
+        blockedMsg = intent.getBooleanExtra("blocked", false)
+        setContent { EscribeTheme { App(blockedMsg) { blockedMsg = false } } }
+    }
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        blockedMsg = intent.getBooleanExtra("blocked", false)
+    }
+}
+
+@Composable
+fun App(blocked: Boolean, dismissBlocked: () -> Unit) {
+    val ctx = LocalContext.current
+    val store = remember { Store(ctx) }
+    var tab by remember { mutableStateOf(Tab.HOME) }
+    var writing by remember { mutableStateOf(false) }
+    var custom by remember { mutableStateOf<String?>(null) }
+    var reading by remember { mutableStateOf<Long?>(null) }
+    var tick by remember { mutableIntStateOf(0) }
+    var prompt by remember { mutableStateOf(store.savedPrompt()) }
+    var work by remember { mutableStateOf<Work?>(null) }
+    var failure by remember { mutableStateOf<Pair<String, (() -> Unit)?>?>(null) }
+    var job by remember { mutableStateOf<Job?>(null) }
+    val scope = rememberCoroutineScope()
+
+    fun generate(kind: String = Prompts.randomKind()) {
+        if (work != null) return
+        job = scope.launch {
+            work = Work("Buscando inspiración", "Preparando…", 0f)
+            try {
+                val p = Prompts.generate(ctx, store, kind) { pr, st -> work = work?.copy(progress = pr, stage = st) }
+                store.savePrompt(p); prompt = p
+            } catch (e: CancellationException) { throw e
+            } catch (e: NoModelException) { tick++
+            } catch (e: Throwable) { failure = (e.message ?: "Algo falló.") to { generate(kind) }
+            } finally { work = null; tick++ }
+        }
+    }
+
+    fun download(spec: ModelSpec = store.model()) {
+        if (work != null) return
+        job = scope.launch {
+            val total = LocalModel.gb(spec.size)
+            work = Work("Descargando a tu musa", "${spec.name} · solo esta vez", 0f, "0.0 / $total GB", cancellable = true)
+            var ok = false
+            try {
+                LocalModel.download(ctx, spec) { have ->
+                    work = work?.copy(progress = have.toFloat() / spec.size, detail = "${LocalModel.gb(have)} / $total GB")
+                }
+                ok = true
+            } catch (e: CancellationException) { throw e
+            } catch (e: Throwable) { failure = (e.message ?: "La descarga falló.") to { download(spec) }
+            } finally { work = null; tick++ }
+            if (ok && store.savedPrompt() == null && spec.id == store.modelId) generate()
+        }
+    }
+
+    LaunchedEffect(Unit) { if (prompt == null && Prompts.available(ctx, store)) generate() }
+    BackHandler(writing || reading != null || tab != Tab.HOME) {
+        when { writing -> writing = false; reading != null -> reading = null; else -> tab = Tab.HOME }
+    }
+
+    Box(Modifier.fillMaxSize().background(C.Bg)) {
+        when {
+            writing -> Box(Modifier.systemBarsPadding().imePadding()) {
+                WriteScreen(store, prompt ?: Prompt("", "", "", ""), custom, onSaved = { tick++; dismissBlocked(); writing = false; tab = Tab.HOME },
+                    onBack = { writing = false })
+            }
+            reading != null -> ReadScreen(store, reading!!, onBack = { reading = null }, onChanged = { tick++ })
+            else -> {
+                Box(Modifier.statusBarsPadding()) {
+                    when (tab) {
+                        Tab.HOME -> HomeScreen(store, prompt, work != null, blocked, tick,
+                            onWrite = { custom = null; writing = true },
+                            onCustom = { custom = it; writing = true },
+                            onReroll = { generate() },
+                            onDownload = { download() })
+                        Tab.HISTORY -> HistoryScreen(store, tick) { reading = it }
+                        Tab.SETTINGS -> SettingsScreen(store, tick, onDownload = { download(it) }) { tick++; tab = Tab.HOME }
+                    }
+                }
+                BottomBar(tab, Modifier.align(Alignment.BottomCenter)) { tab = it }
+            }
+        }
+        work?.let { w -> WorkDialog(w) { job?.cancel(); work = null; tick++ } }
+        failure?.let { (msg, retry) -> ErrorDialog(msg, retry?.let { r -> { failure = null; r() } }) { failure = null } }
+    }
+}
+
+/** Barra inferior flotante oscura (ref. flat). */
+@Composable
+fun BottomBar(tab: Tab, modifier: Modifier = Modifier, onTab: (Tab) -> Unit) {
+    Row(modifier.navigationBarsPadding().padding(horizontal = 20.dp, vertical = 12.dp).fillMaxWidth().height(70.dp)
+        .clip(RoundedCornerShape(35.dp)).background(C.Ink).padding(horizontal = 10.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) {
+        NavItem(Icons.Rounded.Home, "Hoy", tab == Tab.HOME) { onTab(Tab.HOME) }
+        NavItem(Icons.Rounded.List, "Historias", tab == Tab.HISTORY) { onTab(Tab.HISTORY) }
+        NavItem(Icons.Rounded.Settings, "Ajustes", tab == Tab.SETTINGS) { onTab(Tab.SETTINGS) }
+    }
+}
+
+@Composable
+private fun NavItem(icon: ImageVector, label: String, selected: Boolean, onClick: () -> Unit) {
+    Row(Modifier.clip(RoundedCornerShape(50)).background(if (selected) C.Lila else Color.Transparent)
+        .clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically) {
+        Icon(icon, null, tint = if (selected) C.Ink else Color.White, modifier = Modifier.size(22.dp))
+        if (selected) { Spacer(Modifier.width(8.dp)); Text(label, color = C.Ink, fontWeight = FontWeight.SemiBold, fontSize = 14.sp) }
+    }
+}

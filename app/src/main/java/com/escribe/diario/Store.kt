@@ -1,0 +1,126 @@
+package com.escribe.diario
+
+import android.content.Context
+import org.json.JSONArray
+import org.json.JSONObject
+import java.time.LocalDate
+
+
+data class Entry(
+    val id: Long,
+    val date: String,
+    val title: String,      // la palabra del día o el tema propio
+    val language: String,   // vacío si es tema propio
+    val theme: String,
+    val body: String,
+    val words: Int,
+    val cover: String?,     // ruta de la imagen de portada (opcional)
+    val custom: Boolean,
+)
+
+fun wordCount(s: String) = s.trim().split(Regex("\\s+")).count { it.isNotEmpty() }
+
+fun truncateWords(s: String, max: Int): String {
+    var count = 0; var i = 0
+    while (i < s.length) {
+        while (i < s.length && s[i].isWhitespace()) i++
+        if (i >= s.length) break
+        while (i < s.length && !s[i].isWhitespace()) i++
+        count++
+        if (count == max) return s.substring(0, i)
+    }
+    return s
+}
+
+class Store(ctx: Context) {
+    private val p = ctx.applicationContext.getSharedPreferences("escribe", Context.MODE_PRIVATE)
+
+    var minWords: Int get() = p.getInt("min", 200); set(v) = p.edit().putInt("min", v).apply()
+    var maxWords: Int get() = p.getInt("max", 400); set(v) = p.edit().putInt("max", v).apply()
+    var cutoffHour: Int get() = p.getInt("cutoff", 17); set(v) = p.edit().putInt("cutoff", v).apply()
+    var blockerOn: Boolean get() = p.getBoolean("blocker", true); set(v) = p.edit().putBoolean("blocker", v).apply()
+    var apiKey: String get() = p.getString("apikey", "") ?: ""; set(v) = p.edit().putString("apikey", v.trim()).apply()
+    var model: String get() = p.getString("model", "claude-opus-5-5") ?: "claude-opus-5-5"; set(v) = p.edit().putString("model", v.trim()).apply()
+    var interests: String get() = p.getString("interests", "") ?: ""; set(v) = p.edit().putString("interests", v).apply()
+    var blockedApps: Set<String>
+        get() = p.getStringSet("blocked", null) ?: DEFAULT_BLOCKED
+        set(v) = p.edit().putStringSet("blocked", v).apply()
+    /** Modelo del teléfono elegido en Ajustes ("e4b" o "12b"). */
+    var modelId: String get() = p.getString("model_id", "e4b") ?: "e4b"; set(v) = p.edit().putString("model_id", v).apply()
+    fun model() = LocalModel.spec(modelId)
+
+    /** Usar Claude en lugar del modelo del teléfono (solo si además hay API key). */
+    var useClaude: Boolean get() = p.getBoolean("use_claude", false); set(v) = p.edit().putBoolean("use_claude", v).apply()
+    fun claudeOn() = useClaude && apiKey.isNotBlank()
+
+    /** Palabras y frases ya usadas, para no repetirlas. */
+    val usedTitles: Set<String> get() = p.getStringSet("used", emptySet()) ?: emptySet()
+    fun markUsed(title: String) = p.edit().putStringSet("used", usedTitles + title.lowercase()).apply()
+
+    var draft: String get() = p.getString("draft", "") ?: ""; set(v) = p.edit().putString("draft", v).apply()
+    var draftCover: String? get() = p.getString("draft_cover", null); set(v) = p.edit().putString("draft_cover", v).apply()
+
+    fun savedPrompt(): Prompt? {
+        if (p.getString("prompt_date", "") != LocalDate.now().toString()) return null
+        return runCatching {
+            val o = JSONObject(p.getString("prompt_json", "")!!)
+            Prompt(o.getString("word"), o.optString("language"), o.optString("meaning"), o.getString("theme"), o.optString("twist"), o.optString("kind", "palabra"))
+        }.getOrNull()
+    }
+
+    fun savePrompt(x: Prompt) {
+        val o = JSONObject().put("word", x.title).put("kind", x.kind).put("language", x.language).put("meaning", x.meaning)
+            .put("theme", x.theme).put("twist", x.twist)
+        p.edit().putString("prompt_date", LocalDate.now().toString()).putString("prompt_json", o.toString()).apply()
+    }
+
+    fun entries(): List<Entry> = runCatching {
+        val a = JSONArray(p.getString("entries", "[]"))
+        (0 until a.length()).map {
+            val o = a.getJSONObject(it)
+            Entry(
+                o.getLong("id"), o.getString("date"), o.getString("title"), o.optString("language"),
+                o.optString("theme"), o.getString("body"), o.getInt("words"),
+                o.optString("cover").ifBlank { null }, o.optBoolean("custom"),
+            )
+        }
+    }.getOrDefault(emptyList()).sortedByDescending { it.id }
+
+    fun entry(id: Long) = entries().firstOrNull { it.id == id }
+
+    private fun write(list: List<Entry>) {
+        val a = JSONArray()
+        list.forEach {
+            a.put(JSONObject().put("id", it.id).put("date", it.date).put("title", it.title).put("language", it.language)
+                .put("theme", it.theme).put("body", it.body).put("words", it.words).put("cover", it.cover ?: "")
+                .put("custom", it.custom))
+        }
+        p.edit().putString("entries", a.toString()).apply()
+    }
+
+    fun addEntry(title: String, language: String, theme: String, body: String, cover: String?, custom: Boolean,
+                 date: LocalDate = LocalDate.now(), id: Long = System.currentTimeMillis()) {
+        write(entries() + Entry(id, date.toString(), title, language, theme, body, wordCount(body), cover, custom))
+        p.edit().putString("draft", "").remove("draft_cover").apply()
+    }
+
+    fun setCover(id: Long, cover: String?) = write(entries().map { if (it.id == id) it.copy(cover = cover) else it })
+    fun delete(id: Long) = write(entries().filter { it.id != id })
+
+    fun daysWritten(): Set<String> = entries().map { it.date }.toSet()
+    fun doneToday(): Boolean = LocalDate.now().toString() in daysWritten()
+    fun totalWords(): Int = entries().sumOf { it.words }
+
+    fun streak(): Int {
+        val days = daysWritten()
+        var d = LocalDate.now(); if (d.toString() !in days) d = d.minusDays(1)
+        var n = 0
+        while (d.toString() in days) { n++; d = d.minusDays(1) }
+        return n
+    }
+
+    companion object {
+        val DEFAULT_BLOCKED = setOf("com.instagram.android", "com.facebook.katana", "com.twitter.android",
+            "com.ss.android.ugc.trill", "com.snapchat.android", "com.reddit.frontpage", "com.tumblr", "com.pinterest")
+    }
+}
