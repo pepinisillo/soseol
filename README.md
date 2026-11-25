@@ -1,4 +1,4 @@
-# Escribe Diario
+# soseol
 
 App de Android para escribir un poquito cada día. Una IA que corre **en tu teléfono** te da un reto (una palabra de otro idioma, una frase o un tema) y escribes entre un mínimo y un máximo de palabras.
 
@@ -30,4 +30,4 @@ O desde la terminal:
 ./gradlew installDebug
 ```
 
-Para el bloqueo de apps: Ajustes de Android → Accesibilidad → Escribe Diario → Activar.
+Para el bloqueo de apps: Ajustes de Android → Accesibilidad → soseol → Activar.

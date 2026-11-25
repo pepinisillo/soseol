@@ -7,7 +7,7 @@ android {
     namespace = "com.escribe.diario"
     compileSdk = 36
     defaultConfig {
-        applicationId = "com.escribe.diario"
+        applicationId = "com.soseol.app"
         minSdk = 26
         targetSdk = 34
         versionCode = 1

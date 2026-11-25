@@ -8,7 +8,7 @@
         </intent>
     </queries>
     <application
-        android:label="Escribe Diario"
+        android:label="soseol"
         android:theme="@style/Theme.Escribe"
         android:allowBackup="true">
         <!-- GPU para la IA del teléfono (LiteRT-LM) -->

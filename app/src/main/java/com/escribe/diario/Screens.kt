@@ -520,7 +520,7 @@ fun SettingsScreen(store: Store, tick: Int = 0, onDownload: (ModelSpec) -> Unit 
             OutlinePill("Activar permiso de accesibilidad", {
                 ctx.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             })
-            Text("Accesibilidad → Apps instaladas → Escribe Diario → Activar", color = C.Muted, fontSize = 12.sp)
+            Text("Accesibilidad → Apps instaladas → soseol → Activar", color = C.Muted, fontSize = 12.sp)
         }
         Section("Musa con IA") {
             Text("Modelo en tu teléfono", fontWeight = FontWeight.SemiBold)
