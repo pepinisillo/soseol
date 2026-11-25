@@ -612,6 +612,7 @@ fun SettingsScreen(store: Store, tick: Int = 0, onDownload: (ModelSpec) -> Unit 
             }
             HorizontalDivider(color = C.Line)
             LineField(likes, { likes = it }, "Tus gustos: fandoms, géneros, personajes", singleLine = false)
+            Text("La IA los usa para elegir tus retos. El botón «Lista» no.", color = C.Muted, fontSize = 11.sp)
         }
         Pill("Guardar cambios", {
             val mn = min.toIntOrNull()?.coerceAtLeast(1) ?: 200
