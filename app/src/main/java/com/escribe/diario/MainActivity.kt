@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 
 enum class Tab { HOME, HISTORY, SETTINGS }
@@ -73,8 +74,11 @@ fun App(blocked: Boolean, dismissBlocked: () -> Unit) {
 
     fun generate(kind: String = Prompts.randomKind()) {
         if (work != null) return
+        val previous = job
         job = scope.launch {
-            work = Work("Buscando inspiración", "Preparando…", 0f)
+            work = Work("Buscando inspiración", "Preparando…", 0f, cancellable = true, cancelLabel = "Cancelar")
+            // Si se canceló un reto mientras el modelo cargaba, se espera a que lo suelte: dos modelos a la vez no caben en memoria.
+            previous?.cancelAndJoin()
             try {
                 val p = Prompts.generate(ctx, store, kind) { pr, st -> work = work?.copy(progress = pr, stage = st) }
                 store.savePrompt(p); prompt = p

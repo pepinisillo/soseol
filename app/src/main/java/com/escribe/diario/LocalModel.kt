@@ -105,6 +105,7 @@ object LocalModel {
                 try { open(ctx, m) } finally { ticker.cancelAndJoin() }
             }
             try {
+                ensureActive()   // si cancelaron mientras cargaba, no se pone a escribir
                 val conv = engine.createConversation(ConversationConfig(samplerConfig = SamplerConfig(64, 0.95, 1.0, Random.nextInt(1, 1_000_000))))
                 try {
                     val sb = StringBuilder()

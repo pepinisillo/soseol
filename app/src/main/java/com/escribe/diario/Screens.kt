@@ -627,7 +627,8 @@ fun AppPicker(selected: Set<String>, onChange: (Set<String>) -> Unit, onDone: ()
 // ---------------------------------------------------------------- TRABAJANDO
 
 /** Lo que la musa está haciendo: descarga o generación. progress va de 0 a 1. */
-data class Work(val title: String, val stage: String, val progress: Float, val detail: String? = null, val cancellable: Boolean = false)
+data class Work(val title: String, val stage: String, val progress: Float, val detail: String? = null,
+                val cancellable: Boolean = false, val cancelLabel: String = "Pausar")
 
 /** Aviso tipo «felicitación» con anillo de progreso. No se cierra tocando fuera, para no interrumpir. */
 @Composable
@@ -648,7 +649,7 @@ fun WorkDialog(w: Work, onCancel: () -> Unit) {
             Text(w.stage, color = Color.White.copy(alpha = 0.8f), textAlign = TextAlign.Center, fontSize = 15.sp)
             if (w.detail != null) Text(w.detail, color = C.Lila, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
             Text("No cierres la app mientras trabaja.", color = C.Muted, fontSize = 12.sp, textAlign = TextAlign.Center)
-            if (w.cancellable) TextButton(onClick = onCancel) { Text("Pausar", color = Color.White) }
+            if (w.cancellable) TextButton(onClick = onCancel) { Text(w.cancelLabel, color = Color.White) }
         }
     }
 }
