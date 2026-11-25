@@ -83,6 +83,10 @@ fun Cover(entryTitle: String, path: String?, modifier: Modifier, seed: Long, let
     }
 }
 
+/** Alto de los botones de Android, para que las listas terminen por encima de ellos y de la barra. */
+@Composable
+fun navBottom() = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+
 // ---------------------------------------------------------------- INICIO
 
 @Composable
@@ -100,7 +104,7 @@ fun HomeScreen(store: Store, prompt: Prompt?, busy: Boolean, blocked: Boolean, t
     var askCustom by remember { mutableStateOf(false) }
     val today = LocalDate.now()
 
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(top = 12.dp, bottom = 110.dp),
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).navigationBarsPadding().padding(horizontal = 20.dp).padding(top = 12.dp, bottom = 80.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
@@ -392,7 +396,7 @@ fun HistoryScreen(store: Store, tick: Int, onOpen: (Long) -> Unit) {
     val list = when (filter) { 1 -> all.filter { it.cover != null }; 2 -> all.filter { it.custom }; else -> all }
 
     LazyVerticalGrid(GridCells.Fixed(2), Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 110.dp),
+        contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 80.dp + navBottom()),
         horizontalArrangement = Arrangement.spacedBy(14.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
         item(span = { GridItemSpan(2) }) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -527,7 +531,7 @@ fun SettingsScreen(store: Store, tick: Int = 0, onDownload: (ModelSpec) -> Unit 
 
     if (pickApps) { AppPicker(blocked, { blocked = it }) { pickApps = false }; return }
 
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(top = 12.dp, bottom = 110.dp),
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).navigationBarsPadding().padding(horizontal = 20.dp).padding(top = 12.dp, bottom = 80.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)) {
         H("Ajustes", 32)
         Section("Tu meta diaria") {
@@ -604,7 +608,7 @@ fun AppPicker(selected: Set<String>, onChange: (Set<String>) -> Unit, onDone: ()
             H("Apps a bloquear", 24, modifier = Modifier.weight(1f))
         }
         Spacer(Modifier.height(12.dp))
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(bottom = 110.dp)) {
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(bottom = 80.dp + navBottom())) {
             items(apps) { (pkg, label) ->
                 val on = pkg in selected
                 Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(C.Card)

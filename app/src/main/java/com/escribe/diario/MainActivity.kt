@@ -38,9 +38,15 @@ enum class Tab { HOME, HISTORY, SETTINGS }
 class MainActivity : ComponentActivity() {
     private var blockedMsg by mutableStateOf(false)
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge(statusBarStyle = SystemBarStyle.light(C.Bg.toArgb(), C.Bg.toArgb()),
-            navigationBarStyle = SystemBarStyle.light(C.Bg.toArgb(), C.Bg.toArgb()))
+        // Barras del sistema transparentes: se ve el fondo de la app detrás de la hora y de los botones de Android.
+        val clear = android.graphics.Color.TRANSPARENT
+        enableEdgeToEdge(statusBarStyle = SystemBarStyle.light(clear, clear), navigationBarStyle = SystemBarStyle.light(clear, clear))
         super.onCreate(savedInstanceState)
+        // Con navegación de 3 botones, Android pone un fondo blanco detrás de ellos; esto lo quita.
+        if (android.os.Build.VERSION.SDK_INT >= 29) {
+            window.isNavigationBarContrastEnforced = false
+            window.isStatusBarContrastEnforced = false
+        }
         blockedMsg = intent.getBooleanExtra("blocked", false)
         setContent { EscribeTheme { App(blockedMsg) { blockedMsg = false } } }
     }
@@ -136,12 +142,12 @@ fun App(blocked: Boolean, dismissBlocked: () -> Unit) {
     }
 }
 
-/** Barra inferior flotante oscura (ref. flat). */
+/** Barra inferior: una cápsula oscura pequeña, centrada, solo con íconos. */
 @Composable
 fun BottomBar(tab: Tab, modifier: Modifier = Modifier, onTab: (Tab) -> Unit) {
-    Row(modifier.navigationBarsPadding().padding(horizontal = 20.dp, vertical = 12.dp).fillMaxWidth().height(70.dp)
-        .clip(RoundedCornerShape(35.dp)).background(C.Ink).padding(horizontal = 10.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) {
+    Row(modifier.navigationBarsPadding().padding(bottom = 10.dp).height(52.dp)
+        .clip(RoundedCornerShape(50)).background(C.Ink).padding(horizontal = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
         NavItem(Icons.Rounded.Home, "Hoy", tab == Tab.HOME) { onTab(Tab.HOME) }
         NavItem(Icons.Rounded.List, "Historias", tab == Tab.HISTORY) { onTab(Tab.HISTORY) }
         NavItem(Icons.Rounded.Settings, "Ajustes", tab == Tab.SETTINGS) { onTab(Tab.SETTINGS) }
@@ -150,10 +156,9 @@ fun BottomBar(tab: Tab, modifier: Modifier = Modifier, onTab: (Tab) -> Unit) {
 
 @Composable
 private fun NavItem(icon: ImageVector, label: String, selected: Boolean, onClick: () -> Unit) {
-    Row(Modifier.clip(RoundedCornerShape(50)).background(if (selected) C.Lila else Color.Transparent)
-        .clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically) {
-        Icon(icon, null, tint = if (selected) C.Ink else Color.White, modifier = Modifier.size(22.dp))
-        if (selected) { Spacer(Modifier.width(8.dp)); Text(label, color = C.Ink, fontWeight = FontWeight.SemiBold, fontSize = 14.sp) }
+    Box(Modifier.size(width = 52.dp, height = 40.dp).clip(RoundedCornerShape(50))
+        .background(if (selected) C.Lila else Color.Transparent).clickable(onClick = onClick),
+        contentAlignment = Alignment.Center) {
+        Icon(icon, label, tint = if (selected) C.Ink else Color.White.copy(alpha = 0.75f), modifier = Modifier.size(21.dp))
     }
 }
