@@ -2,7 +2,6 @@ package com.escribe.diario
 
 import android.content.Intent
 import android.widget.Toast
-import androidx.activity.compose.BackHandler
 import android.content.pm.PackageManager
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -58,6 +57,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -271,14 +271,23 @@ fun WriteScreen(store: Store, prompt: Prompt, custom: String?, onSaved: () -> Un
     var cover by remember { mutableStateOf(if (editing != null) editing.cover else store.draftCover) }
     var celebrate by remember { mutableStateOf(false) }
     val words = wordCount(text)
-    LaunchedEffect(text) { if (editing == null) store.draft = text }
-    // Al editar, la portada original no se borra hasta guardar: si sales sin guardar, la historia queda como estaba.
-    fun dropCover() { if (editing == null || cover != editing.cover) Covers.delete(cover) }
-    val pick = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        if (uri != null) Covers.import(ctx, uri)?.let { dropCover(); cover = it; if (editing == null) store.draftCover = it }
+    // Si ya contaba como terminada al abrirla; para saber si al guardar hay que celebrar.
+    val startedComplete = remember { editing?.complete ?: false }
+
+    // Autoguardado: una historia nueva se guarda como borrador con cada cambio; una que se está editando,
+    // en la historia misma, un momento después de dejar de teclear y al salir de la pantalla.
+    fun persist(body: String = text, c: String? = cover) {
+        if (editing == null) { store.draft = body; store.draftCover = c } else store.autosaveEntry(editing.id, body.trim(), c)
     }
-    val leave = { dropCover(); onBack() }
-    if (editing != null) BackHandler { leave() }
+    LaunchedEffect(text) { if (editing != null) delay(800); persist() }
+    val latest by rememberUpdatedState(text to cover)
+    DisposableEffect(Unit) { onDispose { if (editing != null) persist(latest.first, latest.second) } }
+
+    // La portada se guarda en cuanto se elige o se quita.
+    fun setCover(c: String?) { Covers.delete(cover); cover = c; persist(c = c) }
+    val pick = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        if (uri != null) Covers.import(ctx, uri)?.let { setCover(it) }
+    }
     val isCustom = editing?.custom ?: (custom != null)
     val title = editing?.title ?: custom ?: prompt.title
     val language = editing?.language ?: if (custom == null) prompt.language else ""
@@ -304,12 +313,12 @@ fun WriteScreen(store: Store, prompt: Prompt, custom: String?, onSaved: () -> Un
     }
     Column(Modifier.fillMaxSize().systemBarsPadding().imePadding().padding(horizontal = 20.dp).padding(top = 8.dp, bottom = 12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            RoundIcon(Icons.Rounded.ArrowBack, if (editing != null) leave else onBack)
+            RoundIcon(Icons.Rounded.ArrowBack, onBack)
             Spacer(Modifier.weight(1f))
             if (cover == null) Pill("Portada", pickCover, bg = C.Soft, fg = C.Ink, height = 36.dp, hPad = 14.dp, textSize = 13, icon = Icons.Rounded.Add)
             else {
                 RoundIcon(Icons.Rounded.Edit, pickCover, bg = Color.White, fg = C.Ink, size = 36.dp)
-                RoundIcon(Icons.Rounded.Close, { dropCover(); cover = null; if (editing == null) store.draftCover = null },
+                RoundIcon(Icons.Rounded.Close, { setCover(null) },
                     bg = Color.White, fg = C.Ink, size = 36.dp)
             }
         }
@@ -358,9 +367,8 @@ fun WriteScreen(store: Store, prompt: Prompt, custom: String?, onSaved: () -> Un
                 Box(Modifier.padding(horizontal = 12.dp).width(1.dp).height(24.dp).background(line))
                 // Se puede guardar desde una palabra para no perder el reto; si no llega al mínimo, queda «sin terminar».
                 Pill("Guardar", {
-                    val wasComplete = editing?.complete ?: false
+                    val wasComplete = startedComplete
                     val complete = if (editing != null) {
-                        if (cover != editing.cover) Covers.delete(editing.cover)
                         store.updateEntry(editing.id, text.trim(), cover)?.complete ?: false
                     } else {
                         store.addEntry(title, language, theme, text.trim(), cover, isCustom)

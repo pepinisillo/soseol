@@ -122,6 +122,10 @@ class Store(ctx: Context) {
         return e
     }
 
+    /** Autoguardado al editar: guarda texto y portada sin decidir si ya cuenta como terminada (eso pasa al darle Guardar). */
+    fun autosaveEntry(id: Long, body: String, cover: String?) =
+        write(entries().map { if (it.id == id) it.copy(body = body, words = wordCount(body), cover = cover) else it })
+
     fun setCover(id: Long, cover: String?) = write(entries().map { if (it.id == id) it.copy(cover = cover) else it })
     fun delete(id: Long) = write(entries().filter { it.id != id })
 
