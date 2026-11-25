@@ -27,16 +27,10 @@ class ScreenshotTest {
     @get:Rule val rule = createComposeRule()
     private lateinit var store: Store
     private val ctx: Context get() = ApplicationProvider.getApplicationContext()
-    private val prompt = Prompt("Komorebi", "japonés", "luz del sol filtrándose entre las hojas",
-        "Una escena corta donde la luz cambia una decisión.", "Que sea al atardecer y alguien llegue tarde.")
-
-    // Retos que generó Gemma 4 E4B en una prueba real (solo se corrigió «una acorde»).
-    private val frase = Prompt("Le coup de foudre", "francés", "«el golpe de rayo»: amor a primera vista",
-        "Un músico de jazz y un poeta se encuentran en una cafetería ruidosa, y el primer beso es como el choque inesperado de un acorde perfecto.",
-        "Él solo escuchó el latido de su corazón en medio del blues.", "frase")
-    private val tema = Prompt("Café en el Invierno Eterno", "", "romance suave, AU",
-        "Dos amigos de la infancia se encuentran en una cafetería bajo una nieve perpetua que nunca se derrite.",
-        "El frío no es natural, es magia compartida.", "tema")
+    // Retos tal como salen de assets/lista.txt: arriba la palabra, la frase resumida o el tema; en el recuadro, lo demás.
+    private val prompt = Prompt("Komorebi", "japonés", "", "la luz del sol que se filtra entre las hojas", "", "palabra")
+    private val frase = Prompt("Llueven cuerdas", "francés", "", "Il pleut des cordes", "«Llueven cuerdas»: llueve a cántaros", "frase")
+    private val tema = Prompt("Viaje en el tiempo", "", "", "ir o volver a otra época", "", "tema")
 
     private fun cover(name: String): String {
         val out = File(ctx.filesDir, "covers/$name").apply { parentFile!!.mkdirs() }
@@ -51,6 +45,7 @@ Había practicado mil formas de decirlo, pero ahora, bajo ese temblor dorado de 
     private fun seed(includeToday: Boolean) {
         ctx.getSharedPreferences("escribe", Context.MODE_PRIVATE).edit().clear().commit()
         store = Store(ctx)
+        store.minWords = 50   // mientras se agregan, para que las historias de ejemplo cuenten como terminadas
         store.savePrompt(prompt)
         val t = LocalDate.now()
         store.addEntry("Meraki", "griego", "Un personaje cocina con todo el cariño.", "x ".repeat(150), null, false, t.minusDays(5), 1)
@@ -59,6 +54,7 @@ Había practicado mil formas de decirlo, pero ahora, bajo ese temblor dorado de 
         store.addEntry("Kintsugi", "japonés", "Una amistad rota que se arregla.", "x ".repeat(180), cover("cups.jpg"), false, t.minusDays(2), 4)
         store.addEntry("Saudade", "portugués", "Extrañar un lugar al que no se puede volver.", "x ".repeat(312), cover("sea.jpg"), false, t.minusDays(1), 5)
         if (includeToday) store.addEntry("Komorebi", "japonés", prompt.theme, sample, cover("forest.jpg"), false, t, 6)
+        store.minWords = 200
     }
 
     private fun shot(name: String, content: @androidx.compose.runtime.Composable () -> Unit) {
