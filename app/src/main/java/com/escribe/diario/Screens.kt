@@ -1,6 +1,7 @@
 package com.escribe.diario
 
 import android.content.Intent
+import android.widget.Toast
 import android.content.pm.PackageManager
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -331,11 +332,16 @@ fun WriteScreen(store: Store, prompt: Prompt, custom: String?, onSaved: () -> Un
                 Spacer(Modifier.width(6.dp))
                 Text("$words/$max", color = C.Muted, fontSize = 12.sp, fontWeight = FontWeight.Medium)
                 Box(Modifier.padding(horizontal = 12.dp).width(1.dp).height(24.dp).background(C.Line))
+                // Se puede guardar desde una palabra para no perder el reto; si no llega al mínimo, queda «sin terminar».
                 Pill("Guardar", {
                     store.addEntry(title, if (custom == null) prompt.language else "", if (custom == null) prompt.theme else "",
                         text.trim(), cover, custom != null)
-                    celebrate = true
-                }, enabled = words >= min, height = 36.dp, hPad = 18.dp, textSize = 14)
+                    if (words >= min) celebrate = true
+                    else {
+                        Toast.makeText(ctx, "Guardada sin terminar: no cuenta para hoy hasta llegar a $min palabras.", Toast.LENGTH_LONG).show()
+                        onSaved()
+                    }
+                }, enabled = words >= 1, height = 36.dp, hPad = 18.dp, textSize = 14)
             }
         }
     }
@@ -415,7 +421,7 @@ fun HistoryScreen(store: Store, tick: Int, onOpen: (Long) -> Unit) {
                 Cover(e.title, e.cover, Modifier.fillMaxWidth().aspectRatio(0.82f).clip(Arch), e.id)
                 Spacer(Modifier.height(8.dp))
                 H(e.title, 19, maxLines = 2, italic = true)
-                Text("${prettyDate(e.date)} · ${e.words} pal.", color = C.Muted, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                Text("${prettyDate(e.date)} · ${e.words} pal.${if (e.complete) "" else " · sin terminar"}", color = C.Muted, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
             }
         }
     }
@@ -451,7 +457,7 @@ fun ReadScreen(store: Store, id: Long, onBack: () -> Unit, onChanged: () -> Unit
             H(entry.title, 34, italic = true)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(if (entry.custom) "tema propio" else entry.language.ifBlank { "reto del día" }, fontFamily = Display, fontStyle = FontStyle.Italic, color = C.LilaDeep, fontSize = 16.sp)
-                Text("  ·  ${entry.words} palabras  ·  ${prettyDate(entry.date)}", color = C.Muted, fontSize = 13.sp)
+                Text("  ·  ${entry.words} palabras${if (entry.complete) "" else " (sin terminar)"}  ·  ${prettyDate(entry.date)}", color = C.Muted, fontSize = 13.sp)
             }
             if (entry.theme.isNotBlank()) Text(entry.theme, color = C.Muted, fontStyle = FontStyle.Italic, fontSize = 15.sp)
             HorizontalDivider(color = C.Line)

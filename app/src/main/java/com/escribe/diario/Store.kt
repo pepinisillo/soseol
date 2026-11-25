@@ -16,6 +16,7 @@ data class Entry(
     val words: Int,
     val cover: String?,     // ruta de la imagen de portada (opcional)
     val custom: Boolean,
+    val complete: Boolean = true,   // llegó al mínimo de palabras; solo estas cuentan para el día y la racha
 )
 
 fun wordCount(s: String) = s.trim().split(Regex("\\s+")).count { it.isNotEmpty() }
@@ -81,7 +82,7 @@ class Store(ctx: Context) {
             Entry(
                 o.getLong("id"), o.getString("date"), o.getString("title"), o.optString("language"),
                 o.optString("theme"), o.getString("body"), o.getInt("words"),
-                o.optString("cover").ifBlank { null }, o.optBoolean("custom"),
+                o.optString("cover").ifBlank { null }, o.optBoolean("custom"), o.optBoolean("complete", true),
             )
         }
     }.getOrDefault(emptyList()).sortedByDescending { it.id }
@@ -93,21 +94,23 @@ class Store(ctx: Context) {
         list.forEach {
             a.put(JSONObject().put("id", it.id).put("date", it.date).put("title", it.title).put("language", it.language)
                 .put("theme", it.theme).put("body", it.body).put("words", it.words).put("cover", it.cover ?: "")
-                .put("custom", it.custom))
+                .put("custom", it.custom).put("complete", it.complete))
         }
         p.edit().putString("entries", a.toString()).apply()
     }
 
     fun addEntry(title: String, language: String, theme: String, body: String, cover: String?, custom: Boolean,
                  date: LocalDate = LocalDate.now(), id: Long = System.currentTimeMillis()) {
-        write(entries() + Entry(id, date.toString(), title, language, theme, body, wordCount(body), cover, custom))
+        val words = wordCount(body)
+        write(entries() + Entry(id, date.toString(), title, language, theme, body, words, cover, custom, words >= minWords))
         p.edit().putString("draft", "").remove("draft_cover").apply()
     }
 
     fun setCover(id: Long, cover: String?) = write(entries().map { if (it.id == id) it.copy(cover = cover) else it })
     fun delete(id: Long) = write(entries().filter { it.id != id })
 
-    fun daysWritten(): Set<String> = entries().map { it.date }.toSet()
+    /** Días en que se escribió de verdad: lo guardado sin llegar al mínimo no cuenta ni desbloquea las apps. */
+    fun daysWritten(): Set<String> = entries().filter { it.complete }.map { it.date }.toSet()
     fun doneToday(): Boolean = LocalDate.now().toString() in daysWritten()
     fun totalWords(): Int = entries().sumOf { it.words }
 
