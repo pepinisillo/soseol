@@ -27,11 +27,14 @@ object Prompts {
         if (store.claudeOn()) return fromClaude(store, kind, onProgress).also { store.markUsed(it.title) }
         val m = store.model()
         if (!LocalModel.isReady(ctx, m)) throw NoModelException()
-        // Para palabra, la IA elige entre unas reales de la lista según los gustos; no las inventa.
-        val options = if (kind == "palabra") Words.candidates(ctx, kind, store.usedTitles, 12) else emptyList()
+        // El modelo local inventa palabras: las tres palabras raras salen directo de la lista (palabras reales con su significado).
+        if (kind == "raras") return Words.pick(ctx, kind, store.usedTitles).also { store.markUsed(it.title); onProgress(1f, "¡Listo!") }
+        // Para palabra y japonesa, la IA elige entre unas reales de la lista según los gustos; no las inventa.
+        val pickWord = kind == "palabra" || kind == "japonesa"
+        val options = if (pickWord) Words.candidates(ctx, kind, store.usedTitles, 12) else emptyList()
         repeat(2) {
             val text = LocalModel.generate(ctx, m, PromptText.askLocal(kind, options, store.interests),
-                if (kind == "palabra") 25 else 90, onProgress)
+                when { pickWord -> 25; kind == "random" -> 40; else -> 90 }, onProgress)
             PromptText.parseLocal(text, kind, options)?.let { store.markUsed(it.title); onProgress(1f, "¡Listo!"); return it }
         }
         // Si no eligió bien una palabra, igual sirve cualquiera de las candidatas.

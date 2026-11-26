@@ -6,6 +6,10 @@
 # palabra: título = la palabra; idioma = idioma · escritura original; recuadro = qué significa.
 # frase:   título = resumen corto en español; recuadro = la frase completa; nota = traducción (si es de otro idioma).
 # tema:    título = el tema; recuadro = una línea corta que lo aclare.
+# idea, idea10, idea5: título = resumen corto; recuadro = la idea (una frase, 10 palabras o 5 palabras).
+# random:  título = tres palabras separadas por « · » que deben aparecer en la historia.
+# rara:    palabra poco común en español; solo la usa el reto «tres palabras raras» (no sale como palabra del día).
+# japonesa y raras salen de las palabras en japonés y en español de esta lista (más las «rara»).
 #
 # Las líneas que empiezan con # se ignoran. Agrega las tuyas donde quieras.
 
@@ -415,6 +419,60 @@ frase|Despacio|suajili|Pole pole|«Despacio, despacio»: sin prisa
 frase|Quien va despacio|italiano|Chi va piano va sano e va lontano|«Quien va despacio va seguro y llega lejos»
 frase|El sol y las estrellas|italiano|L'amor che move il sole e l'altre stelle|«El amor que mueve el sol y las demás estrellas» (Dante)
 
+# ---------------------------------------------------------------- PALABRAS RARAS · español (solo para «tres palabras raras»)
+rara|Alféizar|español|el borde de la ventana, por donde uno se asoma|
+rara|Acendrado|español|puro y sin mancha, como un amor acendrado|
+rara|Arrebujarse|español|envolverse bien en la cobija o en la ropa|
+rara|Atisbar|español|mirar con cuidado, casi a escondidas|
+rara|Barrunto|español|presentimiento de que algo va a pasar|
+rara|Bonhomía|español|bondad sencilla y amable|
+rara|Cárdeno|español|de color morado|
+rara|Celaje|español|el cielo con nubes de colores, sobre todo al atardecer|
+rara|Cendal|español|tela muy fina y transparente|
+rara|Cuita|español|pena, preocupación que se carga por dentro|
+rara|Dédalo|español|laberinto, lugar o asunto muy enredado|
+rara|Desmadejado|español|sin fuerzas, como deshecho|
+rara|Elucubrar|español|darle muchas vueltas a una idea|
+rara|Enjundia|español|lo más sustancioso e importante de algo|
+rara|Errabundo|español|que va de un lado a otro sin rumbo|
+rara|Evanescente|español|que se desvanece poco a poco|
+rara|Fruición|español|gusto intenso al disfrutar algo|
+rara|Gárrulo|español|que habla mucho; también el agua o el viento que suenan sin parar|
+rara|Hálito|español|aliento; soplo suave|
+rara|Inconmensurable|español|tan grande que no se puede medir|
+rara|Iridiscente|español|que brilla con los colores del arcoíris|
+rara|Jolgorio|español|fiesta con mucho ruido y alegría|
+rara|Lumbre|español|fuego encendido para calentarse o cocinar|
+rara|Marasmo|español|quedarse paralizado, sin ánimo para moverse|
+rara|Mohíno|español|triste y disgustado, cabizbajo|
+rara|Nimbo|español|aureola de luz; también una capa de nubes grises|
+rara|Obnubilar|español|nublar la vista o el juicio|
+rara|Oquedad|español|hueco, espacio vacío|
+rara|Pábilo|español|la mecha de una vela|
+rara|Parsimonia|español|calma y lentitud al hacer las cosas|
+rara|Penumbra|español|sombra suave entre la luz y la oscuridad|
+rara|Perenne|español|que no se acaba, que dura siempre|
+rara|Prístino|español|puro, como era al principio|
+rara|Rutilante|español|que brilla mucho|
+rara|Soslayo|español|de soslayo: de lado, mirando de reojo|
+rara|Sigilo|español|silencio y cuidado para no ser notado|
+rara|Taciturno|español|callado, triste y metido en sí mismo|
+rara|Tremolar|español|ondear con el viento, como una bandera|
+rara|Ubérrimo|español|muy fértil, muy abundante|
+rara|Vahído|español|mareo breve, como un desvanecimiento|
+rara|Vorágine|español|remolino; algo que te arrastra con fuerza|
+rara|Zozobra|español|angustia de que algo salga mal|
+rara|Ápice|español|la punta de algo; también lo mínimo, como en «ni un ápice»|
+rara|Albricias|español|expresión de alegría por una buena noticia|
+rara|Alborozo|español|alegría grande que se nota|
+rara|Arcano|español|secreto, misterio muy escondido|
+rara|Cadencia|español|ritmo suave que se repite|
+rara|Candil|español|lámpara de aceite|
+rara|Sinsabor|español|disgusto, pena|
+rara|Ensoñación|español|soñar despierto, fantasía|
+rara|Garúa|español|llovizna fina|
+rara|Azaroso|español|lleno de riesgos o de casualidades|
+
 # ---------------------------------------------------------------- TEMAS · cosas de todos los días
 tema|El piso estaba sucio||alguien tiene que limpiarlo, y nadie quiere|
 tema|Cuando se caen los libros||un estante cede en el peor momento|
@@ -574,3 +632,55 @@ tema|Envidia||querer lo que tiene el otro|
 tema|Soledad||estar rodeado y sentirse solo|
 tema|Esperanza||algo que todavía puede pasar|
 tema|Vergüenza||lo que no quieres que nadie vea|
+
+# ---------------------------------------------------------------- IDEAS · una frase
+idea|La carta sin enviar||Alguien encuentra la carta que nunca se atrevió a mandar.|
+idea|El cuarto cerrado||En la casa de la abuela hay un cuarto que nadie abre desde hace años.|
+idea|Mensaje equivocado||Un mensaje llega al número equivocado y la otra persona contesta.|
+idea|La foto vieja||En una foto de hace diez años aparece alguien que todavía no conocías.|
+idea|Otra vida||Despiertas en la vida que habrías tenido si hubieras dicho que sí.|
+idea|El último día||Es el último día antes de mudarse y queda una cosa por decir.|
+idea|Compañeros de cuarto||Dos rivales tienen que compartir habitación durante un viaje escolar.|
+idea|La lista||Alguien encuentra una lista de deseos escrita por su yo de niño.|
+idea|Apagón||Se va la luz en todo el edificio y los vecinos se conocen por fin.|
+idea|El regreso||Después de años fuera, vuelves al pueblo y nada está donde lo dejaste.|
+idea|Promesa||Dos amigos cumplen una promesa absurda que se hicieron a los doce años.|
+idea|El reloj||Un reloj se detiene cada vez que dices una mentira.|
+
+# ---------------------------------------------------------------- IDEAS · 10 palabras
+idea10|El último tren||Dos desconocidos pierden el último tren y caminan hasta amanecer.|
+idea10|Diario ajeno||Encuentras un diario que describe tu semana antes de vivirla.|
+idea10|La tienda nocturna||Una tienda que solo abre de noche vende recuerdos ajenos.|
+idea10|Vecino nuevo||El vecino nuevo toca el piano cuando no puedes dormir.|
+idea10|El paraguas||Compartir paraguas con alguien que no soportas durante una tormenta.|
+idea10|Cartas al pasado||Cada noche puedes mandar una carta corta a tu pasado.|
+idea10|La fiesta||En la fiesta de graduación nadie recuerda quién organizó todo.|
+idea10|El gato||Un gato callejero elige tu casa y cambia tu rutina.|
+idea10|Sin señal||Un pueblo sin señal obliga a dos amigos a hablar.|
+idea10|El examen||La noche antes del examen alguien toca a tu ventana.|
+
+# ---------------------------------------------------------------- IDEAS · 5 palabras
+idea5|La llave||Una llave que nadie reconoce.|
+idea5|Café para dos||Dos tazas, una ya fría.|
+idea5|El tren||El tren nunca llegó hoy.|
+idea5|Lluvia||Llovió justo en el momento.|
+idea5|La caja||Una caja con tu nombre.|
+idea5|Silencio||Nadie habló durante la cena.|
+idea5|Segunda vez||Lo conociste por segunda vez.|
+idea5|La azotea||Alguien espera en la azotea.|
+idea5|El mensaje||Un mensaje borrado sin leer.|
+idea5|Verano||El último verano juntos aquí.|
+
+# ---------------------------------------------------------------- TRES PALABRAS · al azar
+random|Paraguas · Sandía · Elevador|||
+random|Bicicleta · Faro · Chocolate|||
+random|Cuaderno · Tormenta · Gato|||
+random|Espejo · Tren · Naranja|||
+random|Bufanda · Volcán · Galleta|||
+random|Llave · Acuario · Domingo|||
+random|Guitarra · Niebla · Taza|||
+random|Mapa · Hospital · Fresa|||
+random|Escalera · Luna · Mochila|||
+random|Pan · Semáforo · Ballena|||
+random|Reloj · Jardín · Carta|||
+random|Vela · Autobús · Limón|||

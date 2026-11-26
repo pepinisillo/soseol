@@ -18,16 +18,28 @@ object Words {
         if (line.isBlank() || line.trimStart().startsWith("#")) return null
         val f = line.split("|").map { it.trim() } + List(5) { "" }
         val (kind, title, language, box) = f
-        if (kind !in PromptText.kinds || title.isEmpty()) return null
-        return Prompt(title, language, "", box, f[4], kind)
+        // «rara» no es un tipo de reto: son palabras extra solo para el reto de tres palabras raras.
+        if ((kind !in PromptText.kinds && kind != "rara") || title.isEmpty()) return null
+        return Prompt(title, language, "", box, if (PromptText.isTrio(kind)) PromptText.TRIO_NOTE else f[4], kind)
     }
 
     /** Uno al azar del tipo pedido que no se haya usado; si ya se usaron todos, vuelve a empezar. */
     fun pick(ctx: Context, kind: String, used: Set<String>): Prompt = candidates(ctx, kind, used, 1).first()
 
     /** Varios al azar del tipo pedido, sin repetir los ya usados mientras se pueda. */
-    fun candidates(ctx: Context, kind: String, used: Set<String>, n: Int): List<Prompt> {
-        val list = all(ctx).filter { it.kind == kind }
-        return list.filter { it.title.lowercase() !in used }.ifEmpty { list }.shuffled().take(n)
+    fun candidates(ctx: Context, kind: String, used: Set<String>, n: Int): List<Prompt> = when (kind) {
+        // La palabra japonesa sale de las palabras de la lista que son en japonés.
+        "japonesa" -> fresh(all(ctx).filter { it.kind == "palabra" && it.language.startsWith("japonés") }, used, n)
+            .map { it.copy(kind = "japonesa") }
+        // Tres palabras raras en español: se arman con tres palabras reales de la lista, con su significado.
+        "raras" -> List(n) {
+            val words = fresh(all(ctx).filter { (it.kind == "palabra" || it.kind == "rara") && it.language.startsWith("español") }, used, 3)
+            PromptText.trio(words.map { it.title }, words.joinToString("\n") { "${it.title.lowercase()}: ${it.theme}" }, "raras")
+        }
+        else -> fresh(all(ctx).filter { it.kind == kind }, used, n)
     }
+
+    /** Al azar, sin repetir los ya usados mientras se pueda. */
+    private fun fresh(list: List<Prompt>, used: Set<String>, n: Int) =
+        list.filter { it.title.lowercase() !in used }.ifEmpty { list }.shuffled().take(n)
 }

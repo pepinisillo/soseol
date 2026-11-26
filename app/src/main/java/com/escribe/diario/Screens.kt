@@ -158,7 +158,7 @@ fun HomeScreen(store: Store, prompt: Prompt?, busy: Boolean, blocked: Boolean, t
             Spacer(Modifier.height(4.dp))
             when {
                 prompt != null -> {
-                    H(prompt.title, when (prompt.kind) { "palabra" -> 42; else -> 32 }, italic = true)
+                    H(prompt.title, when (prompt.kind) { "palabra", "japonesa" -> 42; "raras", "random" -> 28; else -> 32 }, italic = true)
                     if (prompt.language.isNotBlank()) Text(prompt.language, fontFamily = Display, fontStyle = FontStyle.Italic, color = C.Ink.copy(alpha = 0.65f), fontSize = 15.sp)
                     if (prompt.meaning.isNotBlank()) Text(prompt.meaning, fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
                     if (prompt.theme.isNotBlank() || prompt.twist.isNotBlank()) Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Color.White.copy(alpha = 0.55f)).padding(14.dp),
