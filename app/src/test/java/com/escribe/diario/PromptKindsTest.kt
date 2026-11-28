@@ -43,25 +43,41 @@ class PromptKindsTest {
     }
 
     @Test fun localIdeaRespetaLongitud() {
-        val ok = PromptText.parseLocal("""{"title":"Diario","idea":"Encuentras un diario que describe tu semana antes de vivirla."}""", "idea10", emptyList())
+        val ok = PromptText.parseLocal("""{"title":"Diario","idea":"Encuentras un diario que describe tu semana antes de vivirla."}""", "idea10")
         assertNotNull(ok)
-        val corta = PromptText.parseLocal("""{"title":"Diario","idea":"Un diario."}""", "idea10", emptyList())
+        val corta = PromptText.parseLocal("""{"title":"Diario","idea":"Un diario."}""", "idea10")
         assertNull(corta)
     }
 
     @Test fun localRandom() {
-        val p = PromptText.parseLocal("""{"words":["paraguas","sandía","elevador"]}""", "random", emptyList())!!
+        val p = PromptText.parseLocal("""{"words":["paraguas","sandía","elevador"]}""", "random")!!
         assertEquals("Paraguas · Sandía · Elevador", p.title)
         assertEquals("random", p.kind)
-        assertNull(PromptText.parseLocal("""{"words":["paraguas","paraguas"]}""", "random", emptyList()))
+        assertNull(PromptText.parseLocal("""{"words":["paraguas","paraguas"]}""", "random"))
     }
 
-    @Test fun localJaponesaEligeDeLaLista() {
-        val opts = Words.candidates(ctx, "japonesa", emptySet(), 12)
-        assertTrue(opts.isNotEmpty())
-        assertTrue(opts.all { it.kind == "japonesa" && it.language.startsWith("japonés") })
-        val p = PromptText.parseLocal("""{"title":"${opts[0].title}"}""", "japonesa", opts)!!
+    @Test fun localPalabraDeLaMusa() {
+        // Con origen «Musa», el modelo del teléfono da la palabra de memoria, con su idioma y significado.
+        val p = PromptText.parseLocal("""{"title":"hidamari","language":"japonés · 陽だまり","box":"el rincón donde se junta el sol"}""", "japonesa")!!
+        assertEquals("Hidamari", p.title)
+        assertEquals("japonés · 陽だまり", p.language)
         assertEquals("japonesa", p.kind)
+        assertNull(PromptText.parseLocal("""{"title":"Hidamari","box":""}""", "palabra"))   // sin significado no sirve
+    }
+
+    @Test fun localRarasDeLaMusa() {
+        val p = PromptText.parseLocal("""{"words":[{"w":"alféizar","m":"el borde de la ventana"},{"w":"duermevela","m":"el sueño ligero"},{"w":"efímero","m":"que dura poco"}]}""", "raras")!!
+        assertEquals("Alféizar · Duermevela · Efímero", p.title)
+        assertEquals(3, p.theme.lines().size)
+        assertEquals(PromptText.TRIO_NOTE, p.twist)
+    }
+
+    @Test fun listaNoRepiteHistorias() {
+        // Lo que ya está en una historia no vuelve a salir de la lista mientras quede otra opción.
+        val todas = Words.all(ctx).filter { it.kind == "tema" }.map { it.title.lowercase() }.toSet()
+        val queda = todas.first()
+        val p = Words.pick(ctx, "tema", emptySet(), todas - queda)
+        assertEquals(queda, p.title.lowercase())
     }
 
     @Test fun listaTieneTodosLosTipos() {

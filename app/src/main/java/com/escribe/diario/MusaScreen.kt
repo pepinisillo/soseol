@@ -13,11 +13,13 @@ import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,6 +45,7 @@ fun MusaScreen(store: Store, onBack: () -> Unit) {
     val origins = remember { mutableStateMapOf<String, String>().apply { PromptText.kinds.forEach { put(it, store.origin(it)) } } }
     var instructions by remember { mutableStateOf(store.musaInstructions.ifBlank { PromptText.DEFAULT_INSTRUCTIONS }) }
     var advanced by remember { mutableStateOf(false) }
+    var askMusa by remember { mutableStateOf<String?>(null) }   // tipo de palabras para el que se pidió «Musa»
     BackHandler(onBack = onBack)
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).navigationBarsPadding()
@@ -79,11 +82,15 @@ fun MusaScreen(store: Store, onBack: () -> Unit) {
                 }
                 if (on) Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("Origen", Modifier.weight(1f), color = C.Muted, fontSize = 13.sp)
-                    Segmented(listOf("lista" to "Lista", "musa" to "Musa"), origins[k.id] ?: k.origin) { origins[k.id] = it }
+                    Segmented(listOf("lista" to "Lista", "musa" to "Musa"), origins[k.id] ?: k.origin) { o ->
+                        // En los tipos de palabras, la musa tiene contras: antes de cambiar se avisa.
+                        if (o == "musa" && k.id in WORD_KINDS && origins[k.id] != "musa") askMusa = k.id else origins[k.id] = o
+                    }
                 }
             }
             Text("Lista: palabras y frases verificadas, sin errores. Musa: más variedad, pero el modelo del teléfono puede equivocarse. " +
-                "Sin IA descargada, todo sale de la lista.", color = C.Muted, fontSize = 11.sp, lineHeight = 15.sp)
+                "Sin IA descargada, todo sale de la lista. Nunca se repite algo que ya usaste en una historia.",
+                color = C.Muted, fontSize = 11.sp, lineHeight = 15.sp)
         }
 
         // Instrucciones: escondidas por defecto; solo para quien quiera cambiar el tono o agregar reglas.
@@ -119,6 +126,8 @@ fun MusaScreen(store: Store, onBack: () -> Unit) {
             }
         }
 
+        askMusa?.let { k -> MusaWordsDialog(onUse = { origins[k] = "musa"; askMusa = null }, onKeep = { askMusa = null }) }
+
         Pill("Guardar", {
             store.interests = likes.trim()
             store.kindsOff = off
@@ -130,6 +139,30 @@ fun MusaScreen(store: Store, onBack: () -> Unit) {
         }, Modifier.fillMaxWidth())
     }
 }
+
+/** Tipos de reto que son palabras: por defecto salen de la lista y pasarlos a «Musa» pide confirmar. */
+private val WORD_KINDS = setOf("palabra", "japonesa", "raras")
+
+/** Aviso con los contras de usar la musa para palabras. */
+@Composable
+private fun MusaWordsDialog(onUse: () -> Unit, onKeep: () -> Unit) = AlertDialog(
+    onDismissRequest = onKeep, containerColor = C.Bg, shape = RoundedCornerShape(28.dp),
+    title = { H("¿Palabras de la musa?", 24) },
+    text = {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("La lista trae palabras reales y revisadas, y sale al instante.", fontWeight = FontWeight.SemiBold)
+            Text("• La musa te da la palabra de memoria y a veces se confunde. En pruebas con la IA del teléfono, Gemma 4 E4B " +
+                "dio palabras que no existen o mal escritas en casi la mitad de las veces en coreano y japonés; la 12B se " +
+                "confundió poco, pero repetía mucho las mismas (como Komorebi).", fontSize = 14.sp)
+            Text("• Tarda más: unos segundos con la E4B y casi un minuto con la 12B.", fontSize = 14.sp)
+            Text("• Con Claude se equivoca mucho menos, pero necesita internet y tu API key.", fontSize = 14.sp)
+            Text("• Nada que ya usaste en una historia se repite: si la musa propone algo repetido, se le pide otra cosa " +
+                "y la espera puede ser el doble.", fontSize = 14.sp)
+        }
+    },
+    confirmButton = { Pill("Usar musa", onUse, height = 44.dp) },
+    dismissButton = { TextButton(onClick = onKeep) { Text("Quedarme con lista", color = C.Ink) } },
+)
 
 /** Selector de dos o más opciones en una cápsula (la elegida va en negro). */
 @Composable

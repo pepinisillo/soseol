@@ -53,7 +53,7 @@ object PromptText {
 
     /** Ejemplo completo de lo que recibe la musa (un reto de tema), para mostrarlo en vivo en «Tu musa». */
     fun preview(instructions: String, interests: String) =
-        header(instructions, interests) to askLocalTail("tema", emptyList(), "un lugar")
+        header(instructions, interests) to askLocalTail("tema", "un lugar")
 
     fun label(kind: String) = when {
         kind == "frase" -> "FRASE DEL DÍA"
@@ -71,7 +71,11 @@ object PromptText {
      * Mensaje para Claude. Solo da la semilla del reto: nada de escenas, personajes ni giros;
      * lo que se escribe lo decide la persona.
      */
-    fun ask(kind: String, instructions: String, interests: String, date: String): String {
+    /** Frase para que la IA no repita lo que ya está en una historia (los más recientes, para no alargar el mensaje). */
+    fun avoidLine(avoid: List<String>) =
+        if (avoid.isEmpty()) "" else "No repitas nada que ya haya usado en sus historias: ${avoid.take(40).joinToString(", ")}. "
+
+    fun ask(kind: String, instructions: String, interests: String, date: String, avoid: List<String> = emptyList()): String {
         val what = when (kind) {
             "frase" -> "UNA FRASE corta para inspirar un texto: puede ser una frase evocadora en español inventada por ti " +
                 "(máximo 12 palabras, como «Los últimos minutos del último ciclo»), o un dicho o frase real de otro idioma " +
@@ -108,7 +112,7 @@ object PromptText {
             "random" -> "{\"title\":\"Paraguas · Sandía · Elevador\",\"language\":\"\",\"box\":\"\",\"note\":\"\"}"
             else -> "{\"title\":\"Yunseul\",\"language\":\"coreano · 윤슬\",\"box\":\"el brillo del sol o de la luna sobre el agua que se mueve\",\"note\":\"\"}"
         }
-        return header(instructions, interests) + "Dame UN reto para hoy ($date). Hoy el reto es $what " +
+        return header(instructions, interests) + "Dame UN reto para hoy ($date). Hoy el reto es $what " + avoidLine(avoid) +
             (if (isIdea(kind)) "La idea es solo un punto de partida: no cuentes la historia completa ni des el final. "
              else "No describas una escena ni des instrucciones: solo la semilla; la persona decide qué escribir. ") +
             "La palabra o frase debe existir de verdad y su traducción debe ser exacta; si no estás segura, elige otra más conocida. " +
@@ -123,20 +127,29 @@ object PromptText {
 
     /**
      * Mensaje para el modelo del teléfono. Solo da la semilla del reto, nunca una escena ni un giro.
-     * Palabra: elige una de [options] (de la lista revisada; el modelo local inventa palabras).
-     * Frase y tema: los inventa en español.
+     * Se usa únicamente con origen «Musa»: frases, temas e ideas los crea; las palabras las da de memoria.
      */
-    fun askLocal(kind: String, options: List<Prompt>, instructions: String, interests: String): String =
-        header(instructions, interests) + askLocalTail(kind, options, temaSeeds.random())
+    fun askLocal(kind: String, instructions: String, interests: String, avoid: List<String> = emptyList()): String =
+        header(instructions, interests) + avoidLine(avoid) + askLocalTail(kind, temaSeeds.random())
 
     /** La parte fija del mensaje al modelo local: qué tipo de reto pedir y en qué formato contestar. */
-    private fun askLocalTail(kind: String, options: List<Prompt>, about: String): String {
+    private fun askLocalTail(kind: String, about: String): String {
         val base = "No describas una escena, no inventes personajes ni des instrucciones: solo la semilla; la persona decide qué escribir. "
         val end = " Responde SOLO con el objeto JSON, sin texto antes ni después y sin bloques de código."
         return when (kind) {
-            "palabra", "japonesa" -> base + "Elige de esta lista UNA palabra que le pueda inspirar hoy, según sus gustos: " +
-                options.joinToString(", ") { it.title } + ". Escríbela exactamente como aparece en la lista. " +
-                "Ejemplo del formato: {\"title\":\"${options.first().title}\"}" + end
+            // Solo se llega aquí si la persona eligió «Musa» para palabras (con aviso): el modelo las da de memoria y puede confundirse.
+            "palabra", "japonesa" -> base + (if (kind == "japonesa") "Dame UNA palabra japonesa bonita o poco común que exista de verdad. "
+                    else "Dame UNA palabra bonita o poco común que exista de verdad: casi siempre de otro idioma " +
+                        "(si sus gustos mencionan idiomas, prefiérelos); a veces en español. ") +
+                "La palabra debe existir de verdad y su significado debe ser exacto; si no estás segura, elige otra más conocida. " +
+                "title: la palabra en alfabeto latino. language: el idioma en español y minúsculas; si usa otra escritura, " +
+                "\" · \" y la palabra original. box: qué significa, máximo 20 palabras. Ejemplo del formato (no lo repitas): " +
+                (if (kind == "japonesa") "{\"title\":\"Hidamari\",\"language\":\"japonés · 陽だまり\",\"box\":\"el rincón donde se junta el sol\"}"
+                 else "{\"title\":\"Yunseul\",\"language\":\"coreano · 윤슬\",\"box\":\"el brillo del sol o de la luna sobre el agua que se mueve\"}") + end
+            "raras" -> base + "Dame TRES palabras poco comunes en español que existan de verdad en el diccionario y que deban " +
+                "aparecer en la historia, cada una con su significado en pocas palabras. Ejemplo del formato (no lo repitas): " +
+                "{\"words\":[{\"w\":\"alféizar\",\"m\":\"el borde de la ventana\"},{\"w\":\"duermevela\",\"m\":\"el sueño ligero\"}," +
+                "{\"w\":\"efímero\",\"m\":\"que dura muy poco\"}]}" + end
             "frase" -> base + "Escribe UNA frase corta y evocadora en español para inspirar un texto (máximo 12 palabras). " +
                 "title: 2 a 4 palabras que la resuman. Ejemplos del formato (no los repitas): " +
                 "{\"title\":\"El último ciclo\",\"phrase\":\"Los últimos minutos del último ciclo.\"} " +
@@ -155,9 +168,19 @@ object PromptText {
         }
     }
 
-    /** Lee la respuesta del modelo local. Para palabra, solo acepta una de [options]. */
-    fun parseLocal(text: String, kind: String, options: List<Prompt>): Prompt? = runCatching {
+    /** Lee la respuesta del modelo local. Si no viene en el formato pedido, devuelve null. */
+    fun parseLocal(text: String, kind: String): Prompt? = runCatching {
         val o = JSONObject(cleanJson(text))
+        if (kind == "raras") {
+            val a = o.getJSONArray("words")
+            val pairs = (0 until a.length()).map { a.getJSONObject(it) }
+                .map { it.getString("w").trim().trim('«', '»', '"', '.').trim() to it.optString("m").trim() }
+                .filter { it.first.isNotEmpty() }.distinctBy { it.first.lowercase() }
+            require(pairs.size >= 3)
+            val three = pairs.take(3)
+            return@runCatching trio(three.map { it.first.replaceFirstChar(Char::uppercase) },
+                three.joinToString("\n") { "${it.first.lowercase()}: ${it.second}" }, "raras")
+        }
         if (kind == "random") {
             val a = o.getJSONArray("words")
             val words = (0 until a.length()).map { a.getString(it).trim().trim('«', '»', '"', '.').trim() }.filter { it.isNotEmpty() }.distinct()
@@ -167,7 +190,11 @@ object PromptText {
         val title = o.getString("title").trim().trim('«', '»', '"', '.').trim()
         require(title.isNotEmpty())
         when (kind) {
-            "palabra", "japonesa" -> options.firstOrNull { it.title.equals(title, ignoreCase = true) }?.copy(kind = kind)
+            // La palabra que dio la musa, con su idioma y su significado.
+            "palabra", "japonesa" -> o.optString("box").trim().takeIf { it.isNotEmpty() }?.let { box ->
+                    val lang = o.optString("language").trim().ifEmpty { if (kind == "japonesa") "japonés" else "" }
+                    Prompt(title.replaceFirstChar(Char::uppercase), lang, "", box, "", kind)
+                }
             "idea", "idea10", "idea5" -> o.getString("idea").trim().takeIf { it.isNotEmpty() && fitsLength(it, kind) }
                 ?.let { Prompt(title, "", "", it, "", kind) }
             "frase" -> o.getString("phrase").trim().takeIf { it.isNotEmpty() }?.let { Prompt(title, "", "", it, "", "frase") }

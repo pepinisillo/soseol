@@ -139,6 +139,13 @@ class Store(ctx: Context) {
     fun setCover(id: Long, cover: String?) = write(entries().map { if (it.id == id) it.copy(cover = cover) else it })
     fun delete(id: Long) = write(entries().filter { it.id != id })
 
+    /**
+     * Lo que ya se usó en alguna historia guardada, en minúsculas: el título completo y, en los retos
+     * de tres palabras («A · B · C»), cada palabra por separado. Ningún reto nuevo debe repetirlo.
+     */
+    fun storyTitles(): Set<String> = entries().flatMap { e -> listOf(e.title) + e.title.split(" · ") }
+        .map { it.trim().lowercase() }.filter { it.isNotEmpty() }.toSet()
+
     /** Días en que se escribió de verdad: lo guardado sin llegar al mínimo no cuenta ni desbloquea las apps. */
     fun daysWritten(): Set<String> = entries().filter { it.complete }.map { it.date }.toSet()
     fun doneToday(): Boolean = LocalDate.now().toString() in daysWritten()

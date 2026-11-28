@@ -26,42 +26,53 @@ object Prompts {
     /** ¿Hay alguna IA lista para pedirle un reto? */
     fun available(ctx: Context, store: Store) = store.claudeOn() || LocalModel.isReady(ctx, store.model())
 
-    /** Pide el reto a Claude (si está activado y hay API key) o al modelo del teléfono. */
+    /** ¿Ya está en una historia? El título completo o, en los retos de tres palabras, alguna de ellas. */
+    private fun repeats(p: Prompt, avoid: Set<String>) =
+        p.title.lowercase() in avoid || p.title.split(" · ").any { it.trim().lowercase() in avoid }
+
+    /**
+     * Pide el reto a Claude (si está activado y hay API key) o al modelo del teléfono. Nunca devuelve algo
+     * que ya esté en una historia: si la IA lo repite, se le pide otro (por eso puede tardar el doble).
+     */
     suspend fun generate(ctx: Context, store: Store, kind: String, onProgress: (Float, String) -> Unit): Prompt {
-        if (store.claudeOn()) return fromClaude(store, kind, onProgress).also { store.markUsed(it.title) }
+        val avoid = store.storyTitles()
+        val recent = store.entries().map { it.title }   // los más recientes primero
+        if (store.claudeOn()) {
+            repeat(2) { attempt ->
+                if (attempt > 0) onProgress(0.03f, "Esa ya la usaste; pidiendo otra…")
+                val p = fromClaude(store, kind, recent, onProgress)
+                if (!repeats(p, avoid)) return p.also { store.markUsed(it.title) }
+            }
+            error("Claude repitió algo que ya usaste. Intenta de nuevo o usa la lista.")
+        }
         val m = store.model()
         if (!LocalModel.isReady(ctx, m)) throw NoModelException()
-        // El modelo local inventa palabras: las tres palabras raras salen directo de la lista (palabras reales con su significado).
-        if (kind == "raras") return Words.pick(ctx, kind, store.usedTitles).also { store.markUsed(it.title); onProgress(1f, "¡Listo!") }
-        // Para palabra y japonesa, la IA elige entre unas reales de la lista según los gustos; no las inventa.
-        val pickWord = kind == "palabra" || kind == "japonesa"
-        val options = if (pickWord) Words.candidates(ctx, kind, store.usedTitles, 12) else emptyList()
-        repeat(2) {
-            val text = LocalModel.generate(ctx, m, PromptText.askLocal(kind, options, store.musaInstructions, store.interests),
-                when { pickWord -> 25; kind == "random" -> 40; else -> 90 }, onProgress)
-            PromptText.parseLocal(text, kind, options)?.let { store.markUsed(it.title); onProgress(1f, "¡Listo!"); return it }
+        // Aquí solo se llega con origen «Musa»: el modelo crea el reto; las palabras las da de memoria (la persona aceptó el aviso).
+        repeat(3) {
+            val text = LocalModel.generate(ctx, m, PromptText.askLocal(kind, store.musaInstructions, store.interests, recent),
+                when (kind) { "random" -> 40; "palabra", "japonesa" -> 120; "raras" -> 200; else -> 90 }, onProgress)
+            PromptText.parseLocal(text, kind)?.takeIf { !repeats(it, avoid) }
+                ?.let { store.markUsed(it.title); onProgress(1f, "¡Listo!"); return it }
         }
-        // Si no eligió bien una palabra, igual sirve cualquiera de las candidatas.
-        if (options.isNotEmpty()) return options.random().also { store.markUsed(it.title) }
-        error("La musa no logró formular el reto. Intenta de nuevo.")
+        error("La musa no logró formular el reto. Intenta de nuevo o usa la lista.")
     }
 
     /** Un reto al instante de la lista hecha a mano, sin IA. */
     fun fromList(ctx: Context, store: Store, kind: String = randomKind(store)): Prompt =
-        Words.pick(ctx, kind, store.usedTitles).also { store.markUsed(it.title) }
+        Words.pick(ctx, kind, store.usedTitles, store.storyTitles()).also { store.markUsed(it.title) }
 
-    private suspend fun fromClaude(store: Store, kind: String, onProgress: (Float, String) -> Unit): Prompt = coroutineScope {
+    private suspend fun fromClaude(store: Store, kind: String, avoid: List<String>, onProgress: (Float, String) -> Unit): Prompt = coroutineScope {
         // Claude no informa avance: el anillo avanza por tiempo y se completa al llegar la respuesta.
         val ticker = launch { var p = 0.03f; while (true) { onProgress(p, "Consultando a Claude…"); p += (0.92f - p) * 0.04f; delay(200) } }
         try {
-            withContext(Dispatchers.IO) { askClaude(store, kind) }
+            withContext(Dispatchers.IO) { askClaude(store, kind, avoid) }
                 ?.also { onProgress(1f, "¡Listo!") }
                 ?: error("Claude no respondió. Revisa tu API key o tu conexión.")
         } finally { ticker.cancelAndJoin() }
     }
 
-    private fun askClaude(store: Store, kind: String): Prompt? = runCatching {
-        val ask = PromptText.ask(kind, store.musaInstructions, store.interests, LocalDate.now().toString())
+    private fun askClaude(store: Store, kind: String, avoid: List<String>): Prompt? = runCatching {
+        val ask = PromptText.ask(kind, store.musaInstructions, store.interests, LocalDate.now().toString(), avoid)
         val body = JSONObject().put("model", store.model).put("max_tokens", 600)
             .put("messages", org.json.JSONArray().put(JSONObject().put("role", "user").put("content", ask)))
         val c = URL("https://api.anthropic.com/v1/messages").openConnection() as HttpURLConnection
