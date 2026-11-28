@@ -17,6 +17,7 @@ data class Entry(
     val cover: String?,     // ruta de la imagen de portada (opcional)
     val custom: Boolean,
     val complete: Boolean = true,   // llegó al mínimo de palabras; solo estas cuentan para el día y la racha
+    val seconds: Long = 0,          // tiempo escribiendo: solo cuenta con el cursor en el recuadro
 )
 
 fun wordCount(s: String) = s.trim().split(Regex("\\s+")).count { it.isNotEmpty() }
@@ -72,6 +73,7 @@ class Store(ctx: Context) {
 
     var draft: String get() = p.getString("draft", "") ?: ""; set(v) = p.edit().putString("draft", v).apply()
     var draftCover: String? get() = p.getString("draft_cover", null); set(v) = p.edit().putString("draft_cover", v).apply()
+    var draftSeconds: Long get() = p.getLong("draft_seconds", 0); set(v) = p.edit().putLong("draft_seconds", v).apply()
 
     fun savedPrompt(): Prompt? {
         if (p.getString("prompt_date", "") != LocalDate.now().toString()) return null
@@ -95,6 +97,7 @@ class Store(ctx: Context) {
                 o.getLong("id"), o.getString("date"), o.getString("title"), o.optString("language"),
                 o.optString("theme"), o.getString("body"), o.getInt("words"),
                 o.optString("cover").ifBlank { null }, o.optBoolean("custom"), o.optBoolean("complete", true),
+                o.optLong("seconds"),
             )
         }
     }.getOrDefault(emptyList()).sortedByDescending { it.id }
@@ -106,35 +109,35 @@ class Store(ctx: Context) {
         list.forEach {
             a.put(JSONObject().put("id", it.id).put("date", it.date).put("title", it.title).put("language", it.language)
                 .put("theme", it.theme).put("body", it.body).put("words", it.words).put("cover", it.cover ?: "")
-                .put("custom", it.custom).put("complete", it.complete))
+                .put("custom", it.custom).put("complete", it.complete).put("seconds", it.seconds))
         }
         p.edit().putString("entries", a.toString()).apply()
     }
 
     fun addEntry(title: String, language: String, theme: String, body: String, cover: String?, custom: Boolean,
-                 date: LocalDate = LocalDate.now(), id: Long = System.currentTimeMillis()) {
+                 date: LocalDate = LocalDate.now(), id: Long = System.currentTimeMillis(), seconds: Long = 0) {
         val words = wordCount(body)
-        write(entries() + Entry(id, date.toString(), title, language, theme, body, words, cover, custom, words >= minWords))
-        p.edit().putString("draft", "").remove("draft_cover").apply()
+        write(entries() + Entry(id, date.toString(), title, language, theme, body, words, cover, custom, words >= minWords, seconds))
+        p.edit().putString("draft", "").remove("draft_cover").remove("draft_seconds").apply()
     }
 
     /**
      * Guarda los cambios a una historia ya guardada. Si con esto llega al mínimo por primera vez,
      * pasa a contar como escrita hoy (no el día en que se empezó, para no rellenar la racha hacia atrás).
      */
-    fun updateEntry(id: Long, body: String, cover: String?): Entry? {
+    fun updateEntry(id: Long, body: String, cover: String?, seconds: Long): Entry? {
         val old = entry(id) ?: return null
         val words = wordCount(body)
         val complete = old.complete || words >= minWords
-        val e = old.copy(body = body, words = words, cover = cover, complete = complete,
+        val e = old.copy(body = body, words = words, cover = cover, complete = complete, seconds = seconds,
             date = if (complete && !old.complete) LocalDate.now().toString() else old.date)
         write(entries().map { if (it.id == id) e else it })
         return e
     }
 
     /** Autoguardado al editar: guarda texto y portada sin decidir si ya cuenta como terminada (eso pasa al darle Guardar). */
-    fun autosaveEntry(id: Long, body: String, cover: String?) =
-        write(entries().map { if (it.id == id) it.copy(body = body, words = wordCount(body), cover = cover) else it })
+    fun autosaveEntry(id: Long, body: String, cover: String?, seconds: Long) =
+        write(entries().map { if (it.id == id) it.copy(body = body, words = wordCount(body), cover = cover, seconds = seconds) else it })
 
     fun setCover(id: Long, cover: String?) = write(entries().map { if (it.id == id) it.copy(cover = cover) else it })
     fun delete(id: Long) = write(entries().filter { it.id != id })

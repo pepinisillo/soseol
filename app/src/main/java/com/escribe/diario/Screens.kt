@@ -30,6 +30,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -275,10 +278,22 @@ fun WriteScreen(store: Store, prompt: Prompt, custom: String?, onSaved: () -> Un
     // Si ya contaba como terminada al abrirla; para saber si al guardar hay que celebrar.
     val startedComplete = remember { editing?.complete ?: false }
 
+    // Cronómetro: solo corre con el cursor en el recuadro y la app en pantalla (se pausa al salir o apagar la pantalla).
+    var seconds by remember { mutableLongStateOf(editing?.seconds ?: store.draftSeconds) }
+    var focused by remember { mutableStateOf(false) }
+    val resumed = LocalLifecycleOwner.current.lifecycle.currentStateFlow.collectAsState().value
+        .isAtLeast(Lifecycle.State.RESUMED)
+    LaunchedEffect(focused && resumed) {
+        while (focused && resumed) {
+            delay(1000); seconds++
+            if (editing == null) store.draftSeconds = seconds
+        }
+    }
+
     // Autoguardado: una historia nueva se guarda como borrador con cada cambio; una que se está editando,
     // en la historia misma, un momento después de dejar de teclear y al salir de la pantalla.
     fun persist(body: String = text, c: String? = cover) {
-        if (editing == null) { store.draft = body; store.draftCover = c } else store.autosaveEntry(editing.id, body.trim(), c)
+        if (editing == null) { store.draft = body; store.draftCover = c } else store.autosaveEntry(editing.id, body.trim(), c, seconds)
     }
     LaunchedEffect(text) { if (editing != null) delay(800); persist() }
     val latest by rememberUpdatedState(text to cover)
@@ -341,7 +356,8 @@ fun WriteScreen(store: Store, prompt: Prompt, custom: String?, onSaved: () -> Un
             .background(when { dark && cover != null -> C.Ink.copy(alpha = 0.72f); dark -> C.Ink
                 cover != null -> C.Card.copy(alpha = 0.8f); else -> C.Card })) {
             BasicTextField(text, { n -> text = if (wordCount(n) > max) truncateWords(n, max) else n },
-                Modifier.fillMaxWidth().weight(1f).padding(start = 20.dp, end = 20.dp, top = 18.dp),
+                Modifier.fillMaxWidth().weight(1f).padding(start = 20.dp, end = 20.dp, top = 18.dp)
+                    .onFocusChanged { focused = it.isFocused },
                 textStyle = TextStyle(fontFamily = Reading, fontSize = 18.sp, lineHeight = 29.sp, color = ink),
                 cursorBrush = SolidColor(accent),
                 decorationBox = { inner ->
@@ -370,9 +386,9 @@ fun WriteScreen(store: Store, prompt: Prompt, custom: String?, onSaved: () -> Un
                 Pill("Guardar", {
                     val wasComplete = startedComplete
                     val complete = if (editing != null) {
-                        store.updateEntry(editing.id, text.trim(), cover)?.complete ?: false
+                        store.updateEntry(editing.id, text.trim(), cover, seconds)?.complete ?: false
                     } else {
-                        store.addEntry(title, language, theme, text.trim(), cover, isCustom)
+                        store.addEntry(title, language, theme, text.trim(), cover, isCustom, seconds = seconds)
                         words >= min
                     }
                     when {
@@ -465,7 +481,7 @@ fun HistoryScreen(store: Store, tick: Int, onOpen: (Long) -> Unit) {
                 Cover(e.title, e.cover, Modifier.fillMaxWidth().aspectRatio(0.82f).clip(Arch), e.id)
                 Spacer(Modifier.height(8.dp))
                 H(e.title, 19, maxLines = 2, italic = true)
-                Text("${prettyDate(e.date)} · ${e.words} pal.${if (e.complete) "" else " · sin terminar"}", color = C.Muted, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                Text("${prettyDate(e.date)} · ${e.words} pal.", color = C.Muted, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
             }
         }
     }
@@ -501,7 +517,7 @@ fun ReadScreen(store: Store, id: Long, onBack: () -> Unit, onChanged: () -> Unit
             H(entry.title, 34, italic = true)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(if (entry.custom) "tema propio" else entry.language.ifBlank { "reto del día" }, fontFamily = Display, fontStyle = FontStyle.Italic, color = C.LilaDeep, fontSize = 16.sp)
-                Text("  ·  ${entry.words} palabras${if (entry.complete) "" else " (sin terminar)"}  ·  ${prettyDate(entry.date)}", color = C.Muted, fontSize = 13.sp)
+                Text("  ·  ${entry.words} palabras${if (entry.seconds > 0) "  ·  ${duration(entry.seconds)}" else ""}  ·  ${prettyDate(entry.date)}", color = C.Muted, fontSize = 13.sp)
             }
             if (entry.theme.isNotBlank()) Text(entry.theme, color = C.Muted, fontStyle = FontStyle.Italic, fontSize = 15.sp)
             Pill(if (entry.complete) "Editar" else "Continuar escribiendo", { onEdit(entry.id) }, bg = C.Soft, fg = C.Ink,
@@ -746,5 +762,16 @@ fun ModelCard(m: ModelSpec, selected: Boolean, ready: Boolean, partial: Long, on
             if (ready) TextButton(onClick = onDelete) { Text("Eliminar", color = Color(0xFFB4483C)) }
             else Pill(if (partial > 0) "Continuar" else "Descargar", onDownload, height = 36.dp, hPad = 16.dp, textSize = 13)
         }
+    }
+}
+
+/** 45 s → «<1 min», 754 s → «12 min», 4000 s → «1 h 6 min». */
+fun duration(seconds: Long): String {
+    val m = seconds / 60
+    return when {
+        m < 1 -> "<1 min"
+        m < 60 -> "$m min"
+        m % 60 == 0L -> "${m / 60} h"
+        else -> "${m / 60} h ${m % 60} min"
     }
 }
