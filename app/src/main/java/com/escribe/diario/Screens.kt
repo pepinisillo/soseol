@@ -97,7 +97,7 @@ fun navBottom() = WindowInsets.navigationBars.asPaddingValues().calculateBottomP
 
 @Composable
 fun HomeScreen(store: Store, prompt: Prompt?, busy: Boolean, blocked: Boolean, tick: Int,
-               onWrite: () -> Unit, onCustom: (String) -> Unit, onReroll: () -> Unit, onDownload: () -> Unit,
+               onWrite: () -> Unit, onCustom: (Pair<String, String>) -> Unit, onReroll: () -> Unit, onDownload: () -> Unit,
                onList: () -> Unit = {}, onContinue: (Long) -> Unit = {}) {
     val ctx = LocalContext.current
     val aiReady = remember(tick, busy) { Prompts.available(ctx, store) }
@@ -252,11 +252,18 @@ fun HomeScreen(store: Store, prompt: Prompt?, busy: Boolean, blocked: Boolean, t
     }
 
     if (askCustom) {
+        // Igual que los retos de la musa: un título corto y, si quieres, una descripción que va debajo.
         var t by remember { mutableStateOf("") }
+        var d by remember { mutableStateOf("") }
         AlertDialog(onDismissRequest = { askCustom = false }, containerColor = C.Bg, shape = RoundedCornerShape(28.dp),
             title = { H("Tu propio tema", 24) },
-            text = { LineField(t, { t = it }, "¿Sobre qué quieres escribir?", singleLine = false) },
-            confirmButton = { Pill("Escribir", { if (t.isNotBlank()) { askCustom = false; onCustom(t.trim()) } }, height = 44.dp) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    LineField(t, { t = it }, "Título: palabra, tema, frase…")
+                    LineField(d, { d = it }, "Descripción corta (opcional)", singleLine = false)
+                }
+            },
+            confirmButton = { Pill("Escribir", { if (t.isNotBlank()) { askCustom = false; onCustom(t.trim() to d.trim()) } }, height = 44.dp) },
             dismissButton = { TextButton(onClick = { askCustom = false }) { Text("Cancelar", color = C.Ink) } })
     }
 }
@@ -268,7 +275,7 @@ fun HomeScreen(store: Store, prompt: Prompt?, busy: Boolean, blocked: Boolean, t
  * en vez de una nueva; en ese caso no toca el borrador.
  */
 @Composable
-fun WriteScreen(store: Store, prompt: Prompt, custom: String?, onSaved: () -> Unit, onBack: () -> Unit, editing: Entry? = null) {
+fun WriteScreen(store: Store, prompt: Prompt, custom: Pair<String, String>?, onSaved: () -> Unit, onBack: () -> Unit, editing: Entry? = null) {
     val ctx = LocalContext.current
     val min = store.minWords; val max = store.maxWords
     var text by remember { mutableStateOf(editing?.body ?: store.draft) }
@@ -305,9 +312,9 @@ fun WriteScreen(store: Store, prompt: Prompt, custom: String?, onSaved: () -> Un
         if (uri != null) Covers.import(ctx, uri)?.let { setCover(it) }
     }
     val isCustom = editing?.custom ?: (custom != null)
-    val title = editing?.title ?: custom ?: prompt.title
+    val title = editing?.title ?: custom?.first ?: prompt.title
     val language = editing?.language ?: if (custom == null) prompt.language else ""
-    val theme = editing?.theme ?: if (custom == null) prompt.theme else ""
+    val theme = editing?.theme ?: custom?.second ?: prompt.theme
 
     val pickCover = { pick.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }
     // Con portada, arriba queda oscuro: los íconos de la hora y la batería se ponen blancos; al salir vuelven a negros.

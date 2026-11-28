@@ -63,7 +63,7 @@ fun App(blocked: Boolean, dismissBlocked: () -> Unit) {
     val store = remember { Store(ctx) }
     var tab by remember { mutableStateOf(Tab.HOME) }
     var writing by remember { mutableStateOf(false) }
-    var custom by remember { mutableStateOf<String?>(null) }
+    var custom by remember { mutableStateOf<Pair<String, String>?>(null) }   // tema propio: título y descripción
     var reading by remember { mutableStateOf<Long?>(null) }
     var editing by remember { mutableStateOf<Long?>(null) }   // historia guardada que se está continuando o corrigiendo
     var tick by remember { mutableIntStateOf(0) }
