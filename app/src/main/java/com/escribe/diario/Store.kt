@@ -164,6 +164,6 @@ class Store(ctx: Context) {
 
     companion object {
         val DEFAULT_BLOCKED = setOf("com.instagram.android", "com.facebook.katana", "com.twitter.android",
-            "com.ss.android.ugc.trill", "com.snapchat.android", "com.reddit.frontpage", "com.tumblr", "com.pinterest")
+            "com.ss.android.ugc.trill", "com.zhiliaoapp.musically", "com.snapchat.android", "com.reddit.frontpage", "com.tumblr", "com.pinterest")
     }
 }

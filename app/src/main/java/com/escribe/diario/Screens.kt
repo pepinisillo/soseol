@@ -563,12 +563,23 @@ fun ReadScreen(store: Store, id: Long, onBack: () -> Unit, onChanged: () -> Unit
 // ---------------------------------------------------------------- AJUSTES
 
 @Composable
-fun Section(title: String, content: @Composable ColumnScope.() -> Unit) {
+fun Section(title: String, onInfo: (() -> Unit)? = null, content: @Composable ColumnScope.() -> Unit) {
     Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(26.dp)).background(C.Card).padding(18.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        H(title, 19); content()
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            H(title, 19, modifier = Modifier.weight(1f))
+            if (onInfo != null) InfoButton(onInfo)
+        }
+        content()
     }
 }
+
+/** «?» en un círculo: abre la explicación de una sección. */
+@Composable
+fun InfoButton(onClick: () -> Unit) =
+    Box(Modifier.size(26.dp).clip(CircleShape).background(C.Soft).clickable(onClick = onClick), contentAlignment = Alignment.Center) {
+        Text("?", color = C.Muted, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+    }
 
 /** Campo con contorno suave y esquinas redondeadas (estilo de Ajustes). */
 @Composable
@@ -600,12 +611,14 @@ fun SettingsScreen(store: Store, tick: Int = 0, onDownload: (ModelSpec) -> Unit 
     var musa by remember { mutableStateOf(false) }
     var blocked by remember { mutableStateOf(store.blockedApps) }
     var pickApps by remember { mutableStateOf(false) }
+    var blockerInfo by remember { mutableStateOf(false) }
     var useClaude by remember { mutableStateOf(store.useClaude) }
     var darkWriter by remember { mutableStateOf(store.darkWriter) }
     var chosen by remember { mutableStateOf(store.modelId) }
     var refresh by remember { mutableIntStateOf(0) }
 
-    if (pickApps) { AppPicker(blocked, { blocked = it }) { pickApps = false }; return }
+    // Las apps se guardan en cuanto se marcan, sin esperar al botón Guardar.
+    if (pickApps) { AppPicker(blocked, { blocked = it; store.blockedApps = it }) { pickApps = false }; return }
     if (musa) { MusaScreen(store) { musa = false }; return }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).navigationBarsPadding().padding(horizontal = 20.dp).padding(top = 12.dp, bottom = 80.dp),
@@ -618,18 +631,29 @@ fun SettingsScreen(store: Store, tick: Int = 0, onDownload: (ModelSpec) -> Unit 
             }
             Text("palabras por historia", color = C.Muted, fontSize = 13.sp)
         }
-        Section("Bloqueo de apps") {
+        Section("Bloqueo de apps", onInfo = { blockerInfo = true }) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Bloquear si no he escrito", Modifier.weight(1f), fontWeight = FontWeight.SemiBold)
                 Switch(blocker, { blocker = it }, colors = SwitchDefaults.colors(checkedTrackColor = C.Ink, checkedThumbColor = C.Lila))
             }
             LineField(hour, { hour = it }, "Desde la hora (0-23)", number = true)
             OutlinePill("Elegir apps (${blocked.size})", { pickApps = true })
-            OutlinePill("Activar permiso de accesibilidad", {
+            // Si está conectado de verdad (no solo activado): Xiaomi y otros lo desconectan al limpiar recientes.
+            val running = remember(refresh) { blockerRunning(ctx) }
+            LaunchedEffect(Unit) { while (true) { delay(2000); refresh++ } }
+            Text(if (running) "● Funcionando" else "● Desconectado: no está bloqueando",
+                color = if (running) C.LilaDeep else Color(0xFFB02A2A), fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+            OutlinePill(if (running) "Permiso de accesibilidad" else "Volver a activarlo", {
                 ctx.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             })
-            Text("Accesibilidad → Apps instaladas → soseol → Activar", color = C.Muted, fontSize = 12.sp)
+            val pm = ctx.getSystemService(android.content.Context.POWER_SERVICE) as android.os.PowerManager
+            val free = remember(refresh) { pm.isIgnoringBatteryOptimizations(ctx.packageName) }
+            if (!free) OutlinePill("Quitar límite de batería", {
+                runCatching { ctx.startActivity(Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                    android.net.Uri.parse("package:${ctx.packageName}")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
+            }) else Text("✓ Sin límite de batería", color = C.LilaDeep, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
         }
+        if (blockerInfo) BlockerInfoDialog { blockerInfo = false }
         Section("Musa con IA") {
             Text("Modelo en tu teléfono", fontWeight = FontWeight.SemiBold)
             LocalModel.models.forEach { m ->
@@ -782,3 +806,34 @@ fun duration(seconds: Long): String {
         else -> "${m / 60} h ${m % 60} min"
     }
 }
+
+/** Si el servicio de bloqueo está conectado ahora mismo (activado y corriendo). */
+fun blockerRunning(ctx: android.content.Context): Boolean {
+    if (BlockerService.connected) return true
+    val am = ctx.getSystemService(android.content.Context.ACCESSIBILITY_SERVICE) as android.view.accessibility.AccessibilityManager
+    return am.getEnabledAccessibilityServiceList(android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_ALL_MASK)
+        .any { it.resolveInfo.serviceInfo.packageName == ctx.packageName }
+}
+
+/** Qué hace el bloqueo y cómo dejarlo funcionando, sobre todo en Xiaomi. */
+@Composable
+private fun BlockerInfoDialog(onClose: () -> Unit) = AlertDialog(
+    onDismissRequest = onClose, containerColor = C.Bg, shape = RoundedCornerShape(28.dp),
+    title = { H("Bloqueo de apps", 24) },
+    text = {
+        Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("Desde la hora que elijas, si todavía no escribes tu historia del día, al abrir una de tus apps " +
+                "distractoras se abre soseol encima. Al llegar al mínimo de palabras quedan libres el resto del día; " +
+                "al día siguiente, desde esa misma hora, se vuelven a bloquear hasta que escribas.", fontSize = 14.sp)
+            Text("Para que funcione", fontWeight = FontWeight.SemiBold)
+            Text("• Activa el permiso: Accesibilidad → Apps instaladas → soseol. Solo se usa para saber qué app está " +
+                "al frente; no lee lo que hay en la pantalla.", fontSize = 14.sp)
+            Text("• Si dice «Desconectado» aunque esté activado, apágalo y vuelve a prenderlo.", fontSize = 14.sp)
+            Text("En Xiaomi, Redmi y POCO", fontWeight = FontWeight.SemiBold)
+            Text("El sistema cierra soseol al limpiar recientes y el bloqueo se desconecta. Para evitarlo: ponle candado " +
+                "en recientes (deja presionada su tarjeta), quita el límite de batería y activa «Inicio automático» " +
+                "en Seguridad → Apps → Permisos. La guía completa está en el README.", fontSize = 14.sp)
+        }
+    },
+    confirmButton = { Pill("Entendido", onClose, height = 44.dp) },
+)
