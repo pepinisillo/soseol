@@ -118,9 +118,6 @@ fun HomeScreen(store: Store, prompt: Prompt?, busy: Boolean, blocked: Boolean, t
                     color = C.Muted, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                 H("Escribe hoy", 32)
             }
-            Box(Modifier.size(48.dp).clip(CircleShape).background(C.Lila), contentAlignment = Alignment.Center) {
-                Icon(Icons.Rounded.Create, null, tint = C.Ink)
-            }
         }
 
         if (blocked && !done) {
@@ -151,7 +148,8 @@ fun HomeScreen(store: Store, prompt: Prompt?, busy: Boolean, blocked: Boolean, t
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Tag(if (prompt != null) Prompts.label(prompt.kind) else "RETO DEL DÍA", C.Ink, C.Lila)
                 Spacer(Modifier.weight(1f))
-                if (!done && prompt != null) {
+                // También después de escribir: por si quieres escribir algo más, pero con otra idea.
+                if (prompt != null) {
                     // «Lista» saca un reto al instante de la lista hecha a mano; discreto junto al de la IA.
                     Pill("Lista", { if (!busy) onList() }, bg = Color.White.copy(alpha = 0.45f), fg = C.Ink,
                         height = 34.dp, hPad = 14.dp, textSize = 13)
@@ -816,10 +814,10 @@ fun duration(seconds: Long): String {
     }
 }
 
-
 /** Minúsculas y sin acentos, para buscar «camara» y encontrar «Cámara». */
 private fun plain(t: String) = java.text.Normalizer.normalize(t.lowercase(), java.text.Normalizer.Form.NFD)
     .replace(Regex("\\p{M}"), "")
+
 /** Si el servicio de bloqueo está conectado ahora mismo (activado y corriendo). */
 fun blockerRunning(ctx: android.content.Context): Boolean {
     if (BlockerService.connected) return true
