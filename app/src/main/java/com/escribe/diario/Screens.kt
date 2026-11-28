@@ -709,6 +709,13 @@ fun AppPicker(selected: Set<String>, onChange: (Set<String>) -> Unit, onDone: ()
             .map { it.activityInfo.packageName to it.loadLabel(pm).toString() }
             .distinctBy { it.first }.filter { it.first != ctx.packageName }.sortedBy { it.second.lowercase() }
     }
+    var query by remember { mutableStateOf("") }
+    // Sin buscar, las marcadas van arriba; al buscar, se filtra por nombre sin importar acentos ni mayúsculas.
+    val shown = remember(query) {
+        val q = plain(query.trim())
+        if (q.isEmpty()) apps.sortedByDescending { it.first in selected }
+        else apps.filter { plain(it.second).contains(q) }
+    }
     Column(Modifier.fillMaxSize().padding(horizontal = 20.dp).padding(top = 12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             RoundIcon(Icons.Rounded.ArrowBack, onDone)
@@ -716,8 +723,10 @@ fun AppPicker(selected: Set<String>, onChange: (Set<String>) -> Unit, onDone: ()
             H("Apps a bloquear", 24, modifier = Modifier.weight(1f))
         }
         Spacer(Modifier.height(12.dp))
+        LineField(query, { query = it }, "Buscar app")
+        Spacer(Modifier.height(12.dp))
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(bottom = 80.dp + navBottom())) {
-            items(apps) { (pkg, label) ->
+            items(shown, key = { it.first }) { (pkg, label) ->
                 val on = pkg in selected
                 Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(C.Card)
                     .clickable { onChange(if (on) selected - pkg else selected + pkg) }.padding(horizontal = 16.dp, vertical = 12.dp),
@@ -807,6 +816,10 @@ fun duration(seconds: Long): String {
     }
 }
 
+
+/** Minúsculas y sin acentos, para buscar «camara» y encontrar «Cámara». */
+private fun plain(t: String) = java.text.Normalizer.normalize(t.lowercase(), java.text.Normalizer.Form.NFD)
+    .replace(Regex("\\p{M}"), "")
 /** Si el servicio de bloqueo está conectado ahora mismo (activado y corriendo). */
 fun blockerRunning(ctx: android.content.Context): Boolean {
     if (BlockerService.connected) return true
