@@ -197,7 +197,9 @@ fun HomeScreen(store: Store, prompt: Prompt?, busy: Boolean, blocked: Boolean, t
         val pending = remember(tick, prompt) { prompt?.let { p -> store.entries().firstOrNull { !it.complete && !it.custom && it.title == p.title } } }
         if (pending != null) Pill("Continuar escribiendo", { onContinue(pending.id) }, Modifier.fillMaxWidth(),
             enabled = !busy, icon = Icons.Rounded.Create)
-        else if (prompt != null) Pill(if (done) "Escribir otro con este reto" else "Escribir ahora", onWrite, Modifier.fillMaxWidth(),
+        // «Otro con este reto» solo si ya hay una historia terminada con este mismo reto (no solo por haber escrito hoy).
+        val used = remember(tick, prompt) { prompt?.let { p -> store.entries().any { it.complete && !it.custom && it.title == p.title } } ?: false }
+        if (pending == null && prompt != null) Pill(if (used) "Escribir otro con este reto" else "Escribir ahora", onWrite, Modifier.fillMaxWidth(),
             enabled = !busy, icon = Icons.Rounded.Create)
         GhostPill("Escribir sobre un tema propio", { askCustom = true }, Modifier.fillMaxWidth(), icon = Icons.Rounded.Add)
 
