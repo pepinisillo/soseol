@@ -1,6 +1,6 @@
 # soseol
 
-App de Android para escribir relatos, historias, fanfics cortos cada dia. Se utiliza una IA local, API o una lista en el caso de palabras: para ideas de escritura, pero tambien puedes escribir libremente una idea propia. Se escribe un minimo y maximo de palabras, esto para tener una meta alcanzable. Puedes bloquear aplicaciones distractoras en caso de aun no haber escrito nada dada cierta hora. 
+App de Android para escribir relatos, historias, fanfics cortos cada día. Se utiliza una IA local, API o una lista en el caso de palabras: para ideas de escritura, pero también puedes escribir libremente una idea propia. Se escribe un mínimo y máximo de palabras, esto para tener una meta alcanzable. Puedes bloquear aplicaciones distractoras en caso de aún no haber escrito nada dada cierta hora.
 
 ![Pantallas](capturas/portada.png)
 
