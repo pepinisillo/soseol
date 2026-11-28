@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import com.github.takahirom.roborazzi.captureScreenRoboImage
 import org.junit.Before
@@ -53,7 +55,7 @@ Había practicado mil formas de decirlo, pero ahora, bajo ese temblor dorado de 
         store.addEntry("Mi OC en la lluvia", "", "", "x ".repeat(120), cover("rain.jpg"), true, t.minusDays(3), 3)
         store.addEntry("Kintsugi", "japonés", "Una amistad rota que se arregla.", "x ".repeat(180), cover("cups.jpg"), false, t.minusDays(2), 4)
         store.addEntry("Saudade", "portugués", "Extrañar un lugar al que no se puede volver.", "x ".repeat(312), cover("sea.jpg"), false, t.minusDays(1), 5)
-        if (includeToday) store.addEntry("Komorebi", "japonés", prompt.theme, sample, cover("forest.jpg"), false, t, 6)
+        if (includeToday) store.addEntry("Komorebi", "japonés", prompt.theme, sample, cover("forest.jpg"), false, t, 6, seconds = 754)
         store.minWords = 200
     }
 
@@ -118,13 +120,27 @@ Había practicado mil formas de decirlo, pero ahora, bajo ese temblor dorado de 
 
     @Test fun f_leer() { seed(true); shot("6_leer") { ReadScreen(store, 6, {}, {}) } }
 
+    @Test fun a2_tema_propio() { seed(false)
+        rule.setContent { EscribeTheme { Box(Modifier.fillMaxSize().background(C.Bg)) { HomeScreen(store, prompt, false, false, 0, {}, {}, {}, {}) } } }
+        rule.waitForIdle()
+        rule.mainClock.autoAdvance = false   // con el diálogo abierto la pantalla nunca queda quieta: el reloj se avanza a mano
+        rule.onNodeWithText("Escribir sobre un tema propio").performClick()
+        rule.mainClock.advanceTimeBy(1000)
+        captureScreenRoboImage("build/shots/1h_tema_propio.png")
+    }
+
+    @Config(qualifiers = "w411dp-h1950dp-xxhdpi")
+    @Test fun h_tu_musa() { seed(true); store.interests = "fantasía, misterio y un poco de romance"; shot("8_tu_musa") {
+        MusaScreen(store) {}
+    } }
+
     @Config(qualifiers = "w411dp-h1500dp-xxhdpi")
     @Test fun g2_ajustes_claude() { seed(true); store.useClaude = true; shot("7b_ajustes_con_claude") {
         SettingsScreen(store) {}
     } }
 
     @Config(qualifiers = "w411dp-h1500dp-xxhdpi")
-    @Test fun g_ajustes() { seed(true); shot("7_ajustes") {
+    @Test fun g_ajustes() { seed(true); BlockerService.connected = true; shot("7_ajustes") {
         Box(Modifier.fillMaxSize()) { SettingsScreen(store) {}; BottomBar(Tab.SETTINGS, Modifier.align(Alignment.BottomCenter)) {} }
     } }
 }
