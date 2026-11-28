@@ -16,7 +16,11 @@ class NoModelException : Exception("Descarga primero a la musa.")
 
 object Prompts {
     val kinds = PromptText.kinds
-    fun randomKind() = kinds.random()
+    /** Un tipo al azar entre los que están encendidos en «Tu musa». */
+    fun randomKind(store: Store) = store.enabledKinds().random()
+
+    /** Si este tipo debe pedirse a la musa: su origen es «Musa» y hay una IA lista; si no, sale de la lista. */
+    fun usesMusa(ctx: Context, store: Store, kind: String) = store.origin(kind) == "musa" && available(ctx, store)
     fun label(kind: String) = PromptText.label(kind)
 
     /** ¿Hay alguna IA lista para pedirle un reto? */
@@ -33,7 +37,7 @@ object Prompts {
         val pickWord = kind == "palabra" || kind == "japonesa"
         val options = if (pickWord) Words.candidates(ctx, kind, store.usedTitles, 12) else emptyList()
         repeat(2) {
-            val text = LocalModel.generate(ctx, m, PromptText.askLocal(kind, options, store.interests),
+            val text = LocalModel.generate(ctx, m, PromptText.askLocal(kind, options, store.musaInstructions, store.interests),
                 when { pickWord -> 25; kind == "random" -> 40; else -> 90 }, onProgress)
             PromptText.parseLocal(text, kind, options)?.let { store.markUsed(it.title); onProgress(1f, "¡Listo!"); return it }
         }
@@ -43,7 +47,7 @@ object Prompts {
     }
 
     /** Un reto al instante de la lista hecha a mano, sin IA. */
-    fun fromList(ctx: Context, store: Store, kind: String = randomKind()): Prompt =
+    fun fromList(ctx: Context, store: Store, kind: String = randomKind(store)): Prompt =
         Words.pick(ctx, kind, store.usedTitles).also { store.markUsed(it.title) }
 
     private suspend fun fromClaude(store: Store, kind: String, onProgress: (Float, String) -> Unit): Prompt = coroutineScope {
@@ -57,7 +61,7 @@ object Prompts {
     }
 
     private fun askClaude(store: Store, kind: String): Prompt? = runCatching {
-        val ask = PromptText.ask(kind, store.interests, LocalDate.now().toString())
+        val ask = PromptText.ask(kind, store.musaInstructions, store.interests, LocalDate.now().toString())
         val body = JSONObject().put("model", store.model).put("max_tokens", 600)
             .put("messages", org.json.JSONArray().put(JSONObject().put("role", "user").put("content", ask)))
         val c = URL("https://api.anthropic.com/v1/messages").openConnection() as HttpURLConnection

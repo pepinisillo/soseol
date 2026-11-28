@@ -73,8 +73,16 @@ fun App(blocked: Boolean, dismissBlocked: () -> Unit) {
     var job by remember { mutableStateOf<Job?>(null) }
     val scope = rememberCoroutineScope()
 
-    fun generate(kind: String = Prompts.randomKind()) {
+    /** Reto al instante de la lista hecha a mano, sin IA. */
+    fun fromList(kind: String = Prompts.randomKind(store)) {
         if (work != null) return
+        val p = Prompts.fromList(ctx, store, kind); store.savePrompt(p); prompt = p; tick++
+    }
+
+    fun generate(kind: String = Prompts.randomKind(store)) {
+        if (work != null) return
+        // Los tipos con origen «Lista» (o si no hay IA lista) salen al instante de la lista.
+        if (!Prompts.usesMusa(ctx, store, kind)) { fromList(kind); return }
         val previous = job
         job = scope.launch {
             work = Work("Buscando inspiración", "Preparando…", 0f, cancellable = true, cancelLabel = "Cancelar")
@@ -88,12 +96,6 @@ fun App(blocked: Boolean, dismissBlocked: () -> Unit) {
             } catch (e: Throwable) { failure = (e.message ?: "Algo falló.") to { generate(kind) }
             } finally { work = null; tick++ }
         }
-    }
-
-    /** Reto al instante de la lista hecha a mano, sin IA. */
-    fun fromList() {
-        if (work != null) return
-        val p = Prompts.fromList(ctx, store); store.savePrompt(p); prompt = p; tick++
     }
 
     fun download(spec: ModelSpec = store.model()) {

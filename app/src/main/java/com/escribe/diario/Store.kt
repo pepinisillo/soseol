@@ -53,6 +53,16 @@ class Store(ctx: Context) {
     /** Usar Claude en lugar del modelo del teléfono (solo si además hay API key). */
     var useClaude: Boolean get() = p.getBoolean("use_claude", false); set(v) = p.edit().putBoolean("use_claude", v).apply()
     fun claudeOn() = useClaude && apiKey.isNotBlank()
+    /** Instrucciones para la musa; vacío = las de fábrica (PromptText.DEFAULT_INSTRUCTIONS). */
+    var musaInstructions: String get() = p.getString("musa_instructions", "") ?: ""; set(v) = p.edit().putString("musa_instructions", v).apply()
+    /** Tipos de reto apagados en «Tu musa». */
+    var kindsOff: Set<String> get() = p.getStringSet("kinds_off", emptySet()) ?: emptySet(); set(v) = p.edit().putStringSet("kinds_off", v).apply()
+    /** Tipos que pueden salir; si alguien los apagara todos, se usan todos. */
+    fun enabledKinds(): List<String> = PromptText.kinds.filter { it !in kindsOff }.ifEmpty { PromptText.kinds }
+    /** De dónde sale cada tipo: "lista" o "musa". */
+    fun origin(kind: String): String = p.getString("origin_$kind", null) ?: PromptText.info(kind).origin
+    fun setOrigin(kind: String, origin: String) = p.edit().putString("origin_$kind", origin).apply()
+
     /** Recuadro de escribir oscuro con letra blanca (encendido por defecto). */
     var darkWriter: Boolean get() = p.getBoolean("dark_writer", true); set(v) = p.edit().putBoolean("dark_writer", v).apply()
 

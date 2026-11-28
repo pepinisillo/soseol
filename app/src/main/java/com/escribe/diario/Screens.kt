@@ -152,7 +152,8 @@ fun HomeScreen(store: Store, prompt: Prompt?, busy: Boolean, blocked: Boolean, t
                     // «Lista» saca un reto al instante de la lista hecha a mano; discreto junto al de la IA.
                     Pill("Lista", { if (!busy) onList() }, bg = Color.White.copy(alpha = 0.45f), fg = C.Ink,
                         height = 34.dp, hPad = 14.dp, textSize = 13)
-                    if (aiReady) { Spacer(Modifier.width(8.dp)); RoundIcon(Icons.Rounded.Refresh, { if (!busy) onReroll() }, size = 38.dp) }
+                    // Rehacer usa el origen de cada tipo (Musa o Lista); sin IA lista, sale de la lista.
+                    Spacer(Modifier.width(8.dp)); RoundIcon(Icons.Rounded.Refresh, { if (!busy) onReroll() }, size = 38.dp)
                 }
             }
             Spacer(Modifier.height(4.dp))
@@ -539,7 +540,7 @@ fun ReadScreen(store: Store, id: Long, onBack: () -> Unit, onChanged: () -> Unit
 // ---------------------------------------------------------------- AJUSTES
 
 @Composable
-private fun Section(title: String, content: @Composable ColumnScope.() -> Unit) {
+fun Section(title: String, content: @Composable ColumnScope.() -> Unit) {
     Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(26.dp)).background(C.Card).padding(18.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)) {
         H(title, 19); content()
@@ -573,7 +574,7 @@ fun SettingsScreen(store: Store, tick: Int = 0, onDownload: (ModelSpec) -> Unit 
     var blocker by remember { mutableStateOf(store.blockerOn) }
     var key by remember { mutableStateOf(store.apiKey) }
     var model by remember { mutableStateOf(store.model) }
-    var likes by remember { mutableStateOf(store.interests) }
+    var musa by remember { mutableStateOf(false) }
     var blocked by remember { mutableStateOf(store.blockedApps) }
     var pickApps by remember { mutableStateOf(false) }
     var useClaude by remember { mutableStateOf(store.useClaude) }
@@ -582,6 +583,7 @@ fun SettingsScreen(store: Store, tick: Int = 0, onDownload: (ModelSpec) -> Unit 
     var refresh by remember { mutableIntStateOf(0) }
 
     if (pickApps) { AppPicker(blocked, { blocked = it }) { pickApps = false }; return }
+    if (musa) { MusaScreen(store) { musa = false }; return }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).navigationBarsPadding().padding(horizontal = 20.dp).padding(top = 12.dp, bottom = 80.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -630,8 +632,8 @@ fun SettingsScreen(store: Store, tick: Int = 0, onDownload: (ModelSpec) -> Unit 
                 if (key.isBlank()) Text("Sin API key se usa la musa del teléfono.", color = C.Muted, fontSize = 12.sp)
             }
             HorizontalDivider(color = C.Line)
-            LineField(likes, { likes = it }, "Tus gustos: fandoms, géneros, personajes", singleLine = false)
-            Text("La IA los usa para elegir tus retos. El botón «Lista» no.", color = C.Muted, fontSize = 11.sp)
+            // Gustos, tipos de reto e instrucciones viven en su propia pantalla para no llenar Ajustes.
+            SettingRow("Tu musa", "gustos, retos e instrucciones") { musa = true }
         }
         Section("Al escribir") {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -644,7 +646,7 @@ fun SettingsScreen(store: Store, tick: Int = 0, onDownload: (ModelSpec) -> Unit 
             store.minWords = mn
             store.maxWords = (max.toIntOrNull() ?: 400).coerceAtLeast(mn)
             store.cutoffHour = (hour.toIntOrNull() ?: 17).coerceIn(0, 23)
-            store.blockerOn = blocker; store.apiKey = key; store.model = model; store.interests = likes; store.blockedApps = blocked
+            store.blockerOn = blocker; store.apiKey = key; store.model = model; store.blockedApps = blocked
             store.useClaude = useClaude; store.darkWriter = darkWriter
             onSaved()
         }, Modifier.fillMaxWidth())
