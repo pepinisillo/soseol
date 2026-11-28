@@ -46,6 +46,7 @@ Había practicado mil formas de decirlo, pero ahora, bajo ese temblor dorado de 
 
     private fun seed(includeToday: Boolean) {
         ctx.getSharedPreferences("escribe", Context.MODE_PRIVATE).edit().clear().commit()
+        C.mode = "claro"; BlockerService.connected = false
         store = Store(ctx)
         store.minWords = 50   // mientras se agregan, para que las historias de ejemplo cuenten como terminadas
         store.savePrompt(prompt)
@@ -142,5 +143,21 @@ Había practicado mil formas de decirlo, pero ahora, bajo ese temblor dorado de 
     @Config(qualifiers = "w411dp-h1500dp-xxhdpi")
     @Test fun g_ajustes() { seed(true); BlockerService.connected = true; shot("7_ajustes") {
         Box(Modifier.fillMaxSize()) { SettingsScreen(store) {}; BottomBar(Tab.SETTINGS, Modifier.align(Alignment.BottomCenter)) {} }
+    } }
+
+    // Modo oscuro
+    @Test fun o1_inicio_oscuro() { seed(true); C.mode = "oscuro"; shot("9a_oscuro_inicio") {
+        Box(Modifier.fillMaxSize()) { HomeScreen(store, prompt, false, false, 0, {}, {}, {}, {}); BottomBar(Tab.HOME, Modifier.align(Alignment.BottomCenter)) {} }
+    } }
+    @Test fun o2_escribir_oscuro() { seed(false); C.mode = "oscuro"; store.draft = sample; shot("9b_oscuro_escribir") {
+        WriteScreen(store, prompt, null, {}, {})
+    } }
+    @Test fun o3_historias_oscuro() { seed(true); C.mode = "oscuro"; shot("9c_oscuro_historias") {
+        Box(Modifier.fillMaxSize()) { HistoryScreen(store, 0) {}; BottomBar(Tab.HISTORY, Modifier.align(Alignment.BottomCenter)) {} }
+    } }
+    @Test fun o4_leer_oscuro() { seed(true); C.mode = "oscuro"; shot("9d_oscuro_leer") { ReadScreen(store, 6, {}, {}) } }
+    @Config(qualifiers = "w411dp-h1600dp-xxhdpi")
+    @Test fun o5_ajustes_oscuro() { seed(true); C.mode = "oscuro"; BlockerService.connected = true; shot("9e_oscuro_ajustes") {
+        SettingsScreen(store) {}
     } }
 }

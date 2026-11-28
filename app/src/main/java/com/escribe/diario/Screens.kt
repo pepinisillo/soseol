@@ -73,7 +73,7 @@ fun prettyDate(iso: String): String = runCatching {
 /** Forma de arco (como las fotos de la referencia de viajes). */
 private val Arch = RoundedCornerShape(topStartPercent = 50, topEndPercent = 50, bottomEndPercent = 12, bottomStartPercent = 12)
 
-private val placeholderColors = listOf(C.LilaSoft, C.Ink, C.Peach, C.Sky)
+private val placeholderColors get() = listOf(C.LilaSoft, C.Night, C.Peach, C.Sky)
 
 /** Portada de una historia, o un relleno de color con la inicial si no tiene. */
 @Composable
@@ -84,7 +84,7 @@ fun Cover(entryTitle: String, path: String?, modifier: Modifier, seed: Long, let
     } else {
         val bg = placeholderColors[(seed % placeholderColors.size).toInt().let { if (it < 0) -it else it }]
         Box(modifier.background(bg), contentAlignment = Alignment.Center) {
-            H(entryTitle.take(1).uppercase(), letterSize, if (bg == C.Ink) C.Lila else C.Ink.copy(alpha = 0.75f), italic = true)
+            H(entryTitle.take(1).uppercase(), letterSize, if (bg == C.Night) C.Lila else if (bg == C.LilaSoft) C.Ink.copy(alpha = 0.75f) else C.OnLila.copy(alpha = 0.75f), italic = true)
         }
     }
 }
@@ -121,10 +121,10 @@ fun HomeScreen(store: Store, prompt: Prompt?, busy: Boolean, blocked: Boolean, t
         }
 
         if (blocked && !done) {
-            Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp)).background(C.Ink).padding(16.dp),
+            Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp)).background(C.Night).padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.size(40.dp).clip(CircleShape).background(C.Lila), contentAlignment = Alignment.Center) {
-                    Icon(Icons.Rounded.Lock, null, tint = C.Ink, modifier = Modifier.size(20.dp))
+                    Icon(Icons.Rounded.Lock, null, tint = C.OnLila, modifier = Modifier.size(20.dp))
                 }
                 Spacer(Modifier.width(12.dp))
                 Text("Tus apps están en pausa hasta que escribas ${store.minWords} palabras. ¡Es cortito, tú puedes!",
@@ -135,7 +135,7 @@ fun HomeScreen(store: Store, prompt: Prompt?, busy: Boolean, blocked: Boolean, t
             Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp)).background(C.LilaSoft).padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.size(40.dp).clip(CircleShape).background(C.Lila), contentAlignment = Alignment.Center) {
-                    Icon(Icons.Rounded.Check, null, tint = C.Ink)
+                    Icon(Icons.Rounded.Check, null, tint = C.OnLila)
                 }
                 Spacer(Modifier.width(12.dp))
                 Text("¡Listo por hoy! Ya escribiste y tus apps están libres.", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
@@ -144,29 +144,29 @@ fun HomeScreen(store: Store, prompt: Prompt?, busy: Boolean, blocked: Boolean, t
 
         // Reto del día
         Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(30.dp)).background(C.Lila).padding(22.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            verticalArrangement = Arrangement.spacedBy(6.dp)) { CompositionLocalProvider(LocalContentColor provides C.OnLila) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Tag(if (prompt != null) Prompts.label(prompt.kind) else "RETO DEL DÍA", C.Ink, C.Lila)
+                Tag(if (prompt != null) Prompts.label(prompt.kind) else "RETO DEL DÍA", C.Night, C.Lila)
                 Spacer(Modifier.weight(1f))
                 // También después de escribir: por si quieres escribir algo más, pero con otra idea.
                 if (prompt != null) {
                     // «Lista» saca un reto al instante de la lista hecha a mano; discreto junto al de la IA.
-                    Pill("Lista", { if (!busy) onList() }, bg = Color.White.copy(alpha = 0.45f), fg = C.Ink,
+                    Pill("Lista", { if (!busy) onList() }, bg = Color.White.copy(alpha = 0.45f), fg = C.OnLila,
                         height = 34.dp, hPad = 14.dp, textSize = 13)
                     // Rehacer usa el origen de cada tipo (Musa o Lista); sin IA lista, sale de la lista.
-                    Spacer(Modifier.width(8.dp)); RoundIcon(Icons.Rounded.Refresh, { if (!busy) onReroll() }, size = 38.dp)
+                    Spacer(Modifier.width(8.dp)); RoundIcon(Icons.Rounded.Refresh, { if (!busy) onReroll() }, bg = C.Night, fg = Color.White, size = 38.dp)
                 }
             }
             Spacer(Modifier.height(4.dp))
             when {
                 prompt != null -> {
                     H(prompt.title, when (prompt.kind) { "palabra", "japonesa" -> 42; "raras", "random" -> 28; else -> 32 }, italic = true)
-                    if (prompt.language.isNotBlank()) Text(prompt.language, fontFamily = Display, fontStyle = FontStyle.Italic, color = C.Ink.copy(alpha = 0.65f), fontSize = 15.sp)
+                    if (prompt.language.isNotBlank()) Text(prompt.language, fontFamily = Display, fontStyle = FontStyle.Italic, color = C.OnLila.copy(alpha = 0.65f), fontSize = 15.sp)
                     if (prompt.meaning.isNotBlank()) Text(prompt.meaning, fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
                     if (prompt.theme.isNotBlank() || prompt.twist.isNotBlank()) Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Color.White.copy(alpha = 0.55f)).padding(14.dp),
                         verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         if (prompt.theme.isNotBlank()) Text(prompt.theme, fontSize = 17.sp)
-                        if (prompt.twist.isNotBlank()) Text(prompt.twist, fontSize = 14.sp, color = C.Ink.copy(alpha = 0.7f))
+                        if (prompt.twist.isNotBlank()) Text(prompt.twist, fontSize = 14.sp, color = C.OnLila.copy(alpha = 0.7f))
                     }
                 }
                 busy -> { H("La musa está pensando…", 26, italic = true) }
@@ -175,9 +175,9 @@ fun HomeScreen(store: Store, prompt: Prompt?, busy: Boolean, blocked: Boolean, t
                     Text("Pídele a la musa tu reto de hoy.", fontSize = 15.sp)
                     Spacer(Modifier.height(6.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Pill("Pedir reto", onReroll, height = 46.dp, textSize = 15)
+                        Pill("Pedir reto", onReroll, bg = C.Night, fg = Color.White, height = 46.dp, textSize = 15)
                         Spacer(Modifier.width(10.dp))
-                        Pill("De la lista", onList, bg = Color.White.copy(alpha = 0.45f), fg = C.Ink, height = 46.dp, textSize = 15)
+                        Pill("De la lista", onList, bg = Color.White.copy(alpha = 0.45f), fg = C.OnLila, height = 46.dp, textSize = 15)
                     }
                 }
                 else -> {
@@ -187,11 +187,11 @@ fun HomeScreen(store: Store, prompt: Prompt?, busy: Boolean, blocked: Boolean, t
                         fontSize = 15.sp, lineHeight = 21.sp)
                     Spacer(Modifier.height(6.dp))
                     Pill(if (partial > 0) "Continuar descarga (${LocalModel.gb(partial)} / ${LocalModel.gb(m.size)} GB)"
-                        else "Descargar musa (${LocalModel.gb(m.size)} GB)", onDownload, height = 46.dp, textSize = 15)
-                    Pill("O saca uno de la lista", onList, bg = Color.White.copy(alpha = 0.45f), fg = C.Ink, height = 42.dp, textSize = 14)
+                        else "Descargar musa (${LocalModel.gb(m.size)} GB)", onDownload, bg = C.Night, fg = Color.White, height = 46.dp, textSize = 15)
+                    Pill("O saca uno de la lista", onList, bg = Color.White.copy(alpha = 0.45f), fg = C.OnLila, height = 42.dp, textSize = 14)
                 }
             }
-        }
+        } }
 
         // Si este reto ya tiene una historia guardada sin terminar, se sigue esa en vez de empezar otra.
         val pending = remember(tick, prompt) { prompt?.let { p -> store.entries().firstOrNull { !it.complete && !it.custom && it.title == p.title } } }
@@ -202,13 +202,13 @@ fun HomeScreen(store: Store, prompt: Prompt?, busy: Boolean, blocked: Boolean, t
         GhostPill("Escribir sobre un tema propio", { askCustom = true }, Modifier.fillMaxWidth(), icon = Icons.Rounded.Add)
 
         // Semana (ref. flat "Daily goal")
-        Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(28.dp)).background(C.Ink).padding(20.dp),
+        Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(28.dp)).background(C.Night).padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)) {
             val monday = today.minusDays((today.dayOfWeek.value - 1).toLong())
             val week = (0..6).map { monday.plusDays(it.toLong()) }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 H("Esta semana", 20, Color.White, Modifier.weight(1f))
-                Tag("${week.count { it.toString() in days }}/7", C.Lila, C.Ink)
+                Tag("${week.count { it.toString() in days }}/7", C.Lila, C.OnLila)
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 week.forEachIndexed { i, d ->
@@ -218,7 +218,7 @@ fun HomeScreen(store: Store, prompt: Prompt?, busy: Boolean, blocked: Boolean, t
                         Box(Modifier.size(38.dp).clip(CircleShape)
                             .background(if (hit) C.Lila else if (isToday) C.Lila.copy(alpha = 0.28f) else C.Ink2),
                             contentAlignment = Alignment.Center) {
-                            if (hit) Icon(Icons.Rounded.Check, null, tint = C.Ink, modifier = Modifier.size(20.dp))
+                            if (hit) Icon(Icons.Rounded.Check, null, tint = C.OnLila, modifier = Modifier.size(20.dp))
                             else Text("${d.dayOfMonth}", color = if (isToday) C.Lila else if (d.isAfter(today)) C.Muted else Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                         }
                         Text(listOf("L", "M", "M", "J", "V", "S", "D")[i], color = if (isToday) C.Lila else C.Muted, fontSize = 12.sp, fontWeight = FontWeight.Bold)
@@ -320,8 +320,8 @@ fun WriteScreen(store: Store, prompt: Prompt, custom: Pair<String, String>?, onS
     DisposableEffect(cover != null) {
         val window = (view.context as? android.app.Activity)?.window
         val bars = window?.let { androidx.core.view.WindowCompat.getInsetsController(it, view) }
-        bars?.isAppearanceLightStatusBars = cover == null
-        onDispose { bars?.isAppearanceLightStatusBars = true }
+        bars?.isAppearanceLightStatusBars = cover == null && !C.dark
+        onDispose { bars?.isAppearanceLightStatusBars = !C.dark }
     }
     // La portada va de fondo de toda la pantalla, aclarada para que se lea encima (como un fondo de terminal).
     Box(Modifier.fillMaxSize()) {
@@ -338,9 +338,9 @@ fun WriteScreen(store: Store, prompt: Prompt, custom: Pair<String, String>?, onS
             Spacer(Modifier.weight(1f))
             if (cover == null) Pill("Portada", pickCover, bg = C.Soft, fg = C.Ink, height = 36.dp, hPad = 14.dp, textSize = 13, icon = Icons.Rounded.Add)
             else {
-                RoundIcon(Icons.Rounded.Edit, pickCover, bg = Color.White, fg = C.Ink, size = 36.dp)
+                RoundIcon(Icons.Rounded.Edit, pickCover, bg = Color.White, fg = C.OnLila, size = 36.dp)
                 RoundIcon(Icons.Rounded.Close, { setCover(null) },
-                    bg = Color.White, fg = C.Ink, size = 36.dp)
+                    bg = Color.White, fg = C.OnLila, size = 36.dp)
             }
         }
         Spacer(Modifier.height(14.dp))
@@ -358,7 +358,7 @@ fun WriteScreen(store: Store, prompt: Prompt, custom: Pair<String, String>?, onS
         val accent = if (dark) C.Lila else C.LilaDeep
         val line = if (dark) Color.White.copy(alpha = 0.15f) else C.Line
         Column(Modifier.fillMaxWidth().weight(1f).clip(RoundedCornerShape(26.dp))
-            .background(when { dark && cover != null -> C.Ink.copy(alpha = 0.72f); dark -> C.Ink
+            .background(when { dark && cover != null -> C.Night.copy(alpha = 0.72f); dark -> if (C.dark) C.Card else C.Night
                 cover != null -> C.Card.copy(alpha = 0.8f); else -> C.Card })) {
             BasicTextField(text, { n -> text = if (wordCount(n) > max) truncateWords(n, max) else n },
                 Modifier.fillMaxWidth().weight(1f).padding(start = 20.dp, end = 20.dp, top = 18.dp)
@@ -405,7 +405,7 @@ fun WriteScreen(store: Store, prompt: Prompt, custom: Pair<String, String>?, onS
                         }
                     }
                 }, enabled = words >= 1, height = 36.dp, hPad = 18.dp, textSize = 14,
-                    bg = if (dark) C.Lila else C.Ink, fg = if (dark) C.Ink else Color.White)
+                    bg = if (dark) C.Lila else C.Fill, fg = if (dark) C.OnLila else C.OnFill)
             }
         }
     }
@@ -441,19 +441,19 @@ fun Ring(words: Int, min: Int, max: Int, dark: Boolean = false) {
 fun Celebrate(words: Int, streak: Int, onDone: () -> Unit) {
     val msg = remember { listOf("Hoy escribiste $words palabras.", "Poquito a poquito se hacen las grandes historias.", "Otro día cumplido. Qué orgullo.").random() }
     Dialog(onDismissRequest = onDone) {
-        Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(32.dp)).background(C.Ink).padding(26.dp),
+        Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(32.dp)).background(C.Night).padding(26.dp),
             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Icon(painterResource(R.drawable.ic_trophy), null, tint = C.Lila, modifier = Modifier.size(72.dp))
             H("¡Sigue así!", 30, Color.White)
             Text(msg, color = Color.White.copy(alpha = 0.8f), textAlign = TextAlign.Center, fontSize = 15.sp)
             Row(Modifier.clip(RoundedCornerShape(50)).background(C.Lila).padding(horizontal = 12.dp, vertical = 5.dp),
                 verticalAlignment = Alignment.CenterVertically) {
-                Icon(painterResource(R.drawable.ic_fire), null, tint = C.Ink, modifier = Modifier.size(15.dp))
+                Icon(painterResource(R.drawable.ic_fire), null, tint = C.OnLila, modifier = Modifier.size(15.dp))
                 Spacer(Modifier.width(5.dp))
-                Text("$streak ${if (streak == 1) "DÍA" else "DÍAS"} DE RACHA", color = C.Ink, fontWeight = FontWeight.SemiBold, fontSize = 11.sp, letterSpacing = 0.8.sp)
+                Text("$streak ${if (streak == 1) "DÍA" else "DÍAS"} DE RACHA", color = C.OnLila, fontWeight = FontWeight.SemiBold, fontSize = 11.sp, letterSpacing = 0.8.sp)
             }
             Spacer(Modifier.height(4.dp))
-            Pill("Genial", onDone, Modifier.fillMaxWidth(), bg = Color.White, fg = C.Ink, height = 50.dp)
+            Pill("Genial", onDone, Modifier.fillMaxWidth(), bg = Color.White, fg = C.OnLila, height = 50.dp)
         }
     }
 }
@@ -512,10 +512,10 @@ fun ReadScreen(store: Store, id: Long, onBack: () -> Unit, onChanged: () -> Unit
             .clip(RoundedCornerShape(bottomStart = 36.dp, bottomEnd = 36.dp))) {
             Cover(entry.title, entry.cover, Modifier.fillMaxSize(), entry.id, letterSize = 120)
             Row(Modifier.fillMaxWidth().statusBarsPadding().padding(16.dp)) {
-                RoundIcon(Icons.Rounded.ArrowBack, onBack, bg = Color.White, fg = C.Ink)
+                RoundIcon(Icons.Rounded.ArrowBack, onBack, bg = Color.White, fg = C.OnLila)
                 Spacer(Modifier.weight(1f))
                 RoundIcon(if (entry.cover == null) Icons.Rounded.Add else Icons.Rounded.Edit,
-                    { pick.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }, bg = Color.White, fg = C.Ink)
+                    { pick.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }, bg = Color.White, fg = C.OnLila)
             }
         }
         Column(Modifier.padding(horizontal = 24.dp, vertical = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -632,7 +632,7 @@ fun SettingsScreen(store: Store, tick: Int = 0, onDownload: (ModelSpec) -> Unit 
         Section("Bloqueo de apps", onInfo = { blockerInfo = true }) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Bloquear si no he escrito", Modifier.weight(1f), fontWeight = FontWeight.SemiBold)
-                Switch(blocker, { blocker = it }, colors = SwitchDefaults.colors(checkedTrackColor = C.Ink, checkedThumbColor = C.Lila))
+                Switch(blocker, { blocker = it }, colors = switchColors())
             }
             LineField(hour, { hour = it }, "Desde la hora (0-23)", number = true)
             OutlinePill("Elegir apps (${blocked.size})", { pickApps = true })
@@ -669,7 +669,7 @@ fun SettingsScreen(store: Store, tick: Int = 0, onDownload: (ModelSpec) -> Unit 
                     Text("Usar Claude", fontWeight = FontWeight.SemiBold)
                     Text("Más preciso, necesita internet y API key", color = C.Muted, fontSize = 12.sp)
                 }
-                Switch(useClaude, { useClaude = it }, colors = SwitchDefaults.colors(checkedTrackColor = C.Ink, checkedThumbColor = C.Lila))
+                Switch(useClaude, { useClaude = it }, colors = switchColors())
             }
             if (useClaude) {
                 LineField(key, { key = it }, "API key de Anthropic")
@@ -680,10 +680,19 @@ fun SettingsScreen(store: Store, tick: Int = 0, onDownload: (ModelSpec) -> Unit 
             // Gustos, tipos de reto e instrucciones viven en su propia pantalla para no llenar Ajustes.
             SettingRow("Tu musa", "gustos, retos e instrucciones") { musa = true }
         }
+        Section("Apariencia") {
+            // Se aplica al momento, sin esperar a «Guardar cambios».
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("Tema", Modifier.weight(1f), fontWeight = FontWeight.SemiBold)
+                Segmented(listOf("claro" to "Claro", "oscuro" to "Oscuro", "sistema" to "Sistema"), C.mode) {
+                    C.mode = it; store.theme = it
+                }
+            }
+        }
         Section("Al escribir") {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Recuadro oscuro al escribir", Modifier.weight(1f), fontWeight = FontWeight.SemiBold)
-                Switch(darkWriter, { darkWriter = it }, colors = SwitchDefaults.colors(checkedTrackColor = C.Ink, checkedThumbColor = C.Lila))
+                Switch(darkWriter, { darkWriter = it }, colors = switchColors())
             }
         }
         Pill("Guardar cambios", {
@@ -731,7 +740,7 @@ fun AppPicker(selected: Set<String>, onChange: (Set<String>) -> Unit, onDone: ()
                     verticalAlignment = Alignment.CenterVertically) {
                     Text(label, Modifier.weight(1f), fontWeight = FontWeight.SemiBold)
                     Box(Modifier.size(28.dp).clip(CircleShape).background(if (on) C.Lila else C.Soft), contentAlignment = Alignment.Center) {
-                        if (on) Icon(Icons.Rounded.Check, null, tint = C.Ink, modifier = Modifier.size(18.dp))
+                        if (on) Icon(Icons.Rounded.Check, null, tint = C.OnLila, modifier = Modifier.size(18.dp))
                     }
                 }
             }
@@ -752,7 +761,7 @@ fun WorkDialog(w: Work, onCancel: () -> Unit) {
         val view = LocalView.current
         DisposableEffect(Unit) { view.keepScreenOn = true; onDispose { view.keepScreenOn = false } }
         val shown by animateFloatAsState(w.progress.coerceIn(0f, 1f), tween(450), label = "progreso")
-        Column(Modifier.padding(horizontal = 12.dp).widthIn(max = 340.dp).fillMaxWidth().clip(RoundedCornerShape(32.dp)).background(C.Ink).padding(26.dp),
+        Column(Modifier.padding(horizontal = 12.dp).widthIn(max = 340.dp).fillMaxWidth().clip(RoundedCornerShape(32.dp)).background(C.Night).padding(26.dp),
             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Box(Modifier.size(128.dp), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(progress = { shown }, modifier = Modifier.fillMaxSize(), color = C.Lila,
@@ -782,8 +791,8 @@ fun ModelCard(m: ModelSpec, selected: Boolean, ready: Boolean, partial: Long, on
     Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(if (selected) C.LilaSoft else C.Bg)
         .clickable(onClick = onSelect).padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.size(22.dp).clip(CircleShape).background(if (selected) C.Ink else C.Line), contentAlignment = Alignment.Center) {
-                if (selected) Box(Modifier.size(8.dp).clip(CircleShape).background(C.Lila))
+            Box(Modifier.size(22.dp).clip(CircleShape).background(if (selected) C.Fill else C.Line), contentAlignment = Alignment.Center) {
+                if (selected) Box(Modifier.size(8.dp).clip(CircleShape).background(if (C.dark) C.Night else C.Lila))
             }
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {

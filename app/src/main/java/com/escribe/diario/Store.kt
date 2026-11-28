@@ -73,6 +73,8 @@ class Store(ctx: Context) {
 
     var draft: String get() = p.getString("draft", "") ?: ""; set(v) = p.edit().putString("draft", v).apply()
     var draftCover: String? get() = p.getString("draft_cover", null); set(v) = p.edit().putString("draft_cover", v).apply()
+    /** Apariencia: «claro», «oscuro» o «sistema». */
+    var theme: String get() = p.getString("theme", "claro") ?: "claro"; set(v) = p.edit().putString("theme", v).apply()
     var draftSeconds: Long get() = p.getLong("draft_seconds", 0); set(v) = p.edit().putLong("draft_seconds", v).apply()
 
     fun savedPrompt(): Prompt? {

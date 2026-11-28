@@ -49,7 +49,22 @@ class MainActivity : ComponentActivity() {
             window.isStatusBarContrastEnforced = false
         }
         blockedMsg = intent.getBooleanExtra("blocked", false)
-        setContent { EscribeTheme { App(blockedMsg) { blockedMsg = false } } }
+        C.mode = Store(this).theme
+        C.systemDark = (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+            android.content.res.Configuration.UI_MODE_NIGHT_YES
+        setContent {
+            EscribeTheme {
+                // Íconos de la hora y de los botones: oscuros sobre fondo claro, claros en modo oscuro.
+                val view = androidx.compose.ui.platform.LocalView.current
+                val dark = C.dark
+                SideEffect {
+                    androidx.core.view.WindowCompat.getInsetsController(window, view).apply {
+                        isAppearanceLightStatusBars = !dark; isAppearanceLightNavigationBars = !dark
+                    }
+                }
+                App(blockedMsg) { blockedMsg = false }
+            }
+        }
     }
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
@@ -157,7 +172,7 @@ fun App(blocked: Boolean, dismissBlocked: () -> Unit) {
 @Composable
 fun BottomBar(tab: Tab, modifier: Modifier = Modifier, onTab: (Tab) -> Unit) {
     Row(modifier.navigationBarsPadding().padding(bottom = 10.dp).height(52.dp)
-        .clip(RoundedCornerShape(50)).background(C.Ink).padding(horizontal = 6.dp),
+        .clip(RoundedCornerShape(50)).background(C.Bar).padding(horizontal = 6.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
         NavItem(Icons.Rounded.Home, "Hoy", tab == Tab.HOME) { onTab(Tab.HOME) }
         NavItem(Icons.Rounded.List, "Historias", tab == Tab.HISTORY) { onTab(Tab.HISTORY) }
@@ -170,6 +185,6 @@ private fun NavItem(icon: ImageVector, label: String, selected: Boolean, onClick
     Box(Modifier.size(width = 52.dp, height = 40.dp).clip(RoundedCornerShape(50))
         .background(if (selected) C.Lila else Color.Transparent).clickable(onClick = onClick),
         contentAlignment = Alignment.Center) {
-        Icon(icon, label, tint = if (selected) C.Ink else Color.White.copy(alpha = 0.75f), modifier = Modifier.size(21.dp))
+        Icon(icon, label, tint = if (selected) C.OnLila else Color.White.copy(alpha = 0.75f), modifier = Modifier.size(21.dp))
     }
 }

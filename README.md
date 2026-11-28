@@ -11,6 +11,7 @@ App de Android para escribir relatos, historias, fanfics cortos cada día. Se ut
 - Historias con portada, historial y racha.
 - Bloquea las apps que elijas a partir de cierta hora si no has escrito.
 - Cuenta cuánto tardaste en cada historia (solo mientras escribes).
+- Modo claro, oscuro o el del sistema (Ajustes → Apariencia).
 
 ## Retos
 

@@ -72,13 +72,13 @@ fun MusaScreen(store: Store, onBack: () -> Unit) {
                     Column(Modifier.weight(1f)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(k.name, fontWeight = FontWeight.SemiBold, color = if (on) C.Ink else C.Muted)
-                            if (k.isNew) { Spacer(Modifier.width(8.dp)); Tag("NUEVO", C.Lila, C.Ink) }
+                            if (k.isNew) { Spacer(Modifier.width(8.dp)); Tag("NUEVO", C.Lila, C.OnLila) }
                         }
                         Text(k.desc, color = C.Muted, fontSize = 12.sp, lineHeight = 16.sp)
                     }
                     Spacer(Modifier.width(10.dp))
                     Switch(on, { off = if (it) off - k.id else off + k.id }, enabled = !last,
-                        colors = SwitchDefaults.colors(checkedTrackColor = C.Ink, checkedThumbColor = C.Lila))
+                        colors = switchColors())
                 }
                 if (on) Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("Origen", Modifier.weight(1f), color = C.Muted, fontSize = 13.sp)
@@ -166,13 +166,13 @@ private fun MusaWordsDialog(onUse: () -> Unit, onKeep: () -> Unit) = AlertDialog
 
 /** Selector de dos o más opciones en una cápsula (la elegida va en negro). */
 @Composable
-private fun Segmented(options: List<Pair<String, String>>, selected: String, onSelect: (String) -> Unit) =
+fun Segmented(options: List<Pair<String, String>>, selected: String, onSelect: (String) -> Unit) =
     Row(Modifier.clip(RoundedCornerShape(50)).background(C.Soft).padding(3.dp)) {
         options.forEach { (id, label) ->
             val sel = id == selected
-            Box(Modifier.clip(RoundedCornerShape(50)).background(if (sel) C.Ink else Color.Transparent)
+            Box(Modifier.clip(RoundedCornerShape(50)).background(if (sel) C.Fill else Color.Transparent)
                 .clickable { onSelect(id) }.padding(horizontal = 16.dp, vertical = 7.dp)) {
-                Text(label, color = if (sel) Color.White else C.Ink, fontWeight = FontWeight.Medium, fontSize = 13.sp)
+                Text(label, color = if (sel) C.OnFill else C.Ink, fontWeight = FontWeight.Medium, fontSize = 13.sp)
             }
         }
     }
