@@ -51,7 +51,7 @@ Había practicado mil formas de decirlo, pero ahora, bajo ese temblor dorado de 
         store.minWords = 50   // mientras se agregan, para que las historias de ejemplo cuenten como terminadas
         store.savePrompt(prompt)
         val t = LocalDate.now()
-        store.addEntry("Meraki", "griego", "Un personaje cocina con todo el cariño.", "x ".repeat(150), null, false, t.minusDays(5), 1)
+        store.addEntry("Meraki", "griego", "Un personaje cocina con todo el cariño.", "x ".repeat(150), null, false, t.minusDays(5), 1, seconds = 2100)
         store.addEntry("Hiraeth", "galés", "Un regreso a casa que se siente como despedida.", "x ".repeat(210), null, false, t.minusDays(4), 2)
         store.addEntry("Mi OC en la lluvia", "", "", "x ".repeat(120), cover("rain.jpg"), true, t.minusDays(3), 3)
         store.addEntry("Kintsugi", "japonés", "Una amistad rota que se arregla.", "x ".repeat(180), cover("cups.jpg"), false, t.minusDays(2), 4)

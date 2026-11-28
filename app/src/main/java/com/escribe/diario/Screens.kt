@@ -118,6 +118,13 @@ fun HomeScreen(store: Store, prompt: Prompt?, busy: Boolean, blocked: Boolean, t
                     color = C.Muted, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                 H("Escribe hoy", 32)
             }
+            // Racha arriba a la derecha (abajo ya no se repite: ahí va el tiempo escribiendo).
+            Row(Modifier.clip(RoundedCornerShape(50)).background(C.LilaSoft).padding(horizontal = 14.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically) {
+                Icon(painterResource(R.drawable.ic_fire), null, tint = C.LilaDeep, modifier = Modifier.size(20.dp))
+                Spacer(Modifier.width(6.dp))
+                H("$streak", 22)
+            }
         }
 
         if (blocked && !done) {
@@ -230,14 +237,16 @@ fun HomeScreen(store: Store, prompt: Prompt?, busy: Boolean, blocked: Boolean, t
         }
 
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            // La racha ya está arriba: aquí va el tiempo total escribiendo (lo que mide el cronómetro).
+            val secs = remember(tick) { store.entries().sumOf { it.seconds } }
             Column(Modifier.weight(1f).height(112.dp).clip(RoundedCornerShape(26.dp)).background(C.LilaSoft).padding(18.dp),
                 verticalArrangement = Arrangement.Center) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(painterResource(R.drawable.ic_fire), null, tint = C.LilaDeep, modifier = Modifier.size(30.dp))
+                    Icon(painterResource(R.drawable.ic_clock), null, tint = C.LilaDeep, modifier = Modifier.size(28.dp))
                     Spacer(Modifier.width(8.dp))
-                    H("$streak", 34)
+                    H(if (secs < 3600) "${secs / 60}" else "${secs / 3600}h ${secs % 3600 / 60}", 34, maxLines = 1)
                 }
-                Text("días seguidos", color = C.Ink.copy(alpha = 0.7f), fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                Text(if (secs < 3600) "minutos escribiendo" else "escribiendo", color = C.Ink.copy(alpha = 0.7f), fontSize = 13.sp, fontWeight = FontWeight.Bold)
             }
             Column(Modifier.weight(1f).height(112.dp).clip(RoundedCornerShape(26.dp)).background(C.Card).padding(18.dp),
                 verticalArrangement = Arrangement.Center) {
