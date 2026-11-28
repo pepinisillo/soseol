@@ -9,6 +9,8 @@
     </queries>
     <application
         android:label="soseol"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:theme="@style/Theme.Escribe"
         android:allowBackup="true">
         <!-- GPU para la IA del teléfono (LiteRT-LM) -->
